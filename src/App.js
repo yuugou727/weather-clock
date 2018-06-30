@@ -3,8 +3,8 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Clock from './ClockComponent.js';
-import Weather from './WeatherComponent.js';
+import Clock from './Components/Clock.js';
+import Weather from './Components/Weather.js';
 
 class App extends Component {
   render() {
