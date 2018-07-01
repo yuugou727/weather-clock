@@ -33,23 +33,19 @@ class Weather extends Component {
   componentDidMount () {
     this.getWeather();
     this.updateTimer = setInterval(() => {
-      if ( differenceInMinutes( new Date(), this.state.fetchTime ) > 60){
+      this.updateFetchTimeStatus();
+      if ( differenceInMinutes( new Date(), this.state.fetchTime ) >= 60){ // update weather when it is older than 1 hour
         this.getWeather();
       }
-    }, 1000 * 60 * 10); // Check weather status each 10 mins, update if info is older than 1 hour
-    
-    this.distanceTimer = setInterval(() => {
-      this.updateFetchTimeStatus();
     }, 1000 * 60);
   }
   
   componentWillUnmount () {
     clearInterval(this.updateTimer);
-    clearInterval(this.distanceTimer);
   }
 
   updateFetchTimeStatus () {
-    let string = distanceInWordsStrict( new Date(), this.state.fetchTime, { locale: localeTW }).concat('前')
+    let string = distanceInWordsStrict( new Date(), this.state.fetchTime, { locale: localeTW }).concat('前');
     this.setState({
       fetchTimeStatus: string
     });
@@ -98,7 +94,7 @@ class Weather extends Component {
             });
           })
           .catch((err) => {
-            reject(new Error('[Position] ' + err.message));
+            reject(new Error('[定位錯誤] ' + err.message));
           });
       }
       
@@ -110,12 +106,12 @@ class Weather extends Component {
               lng: position.coords.longitude
             });
           },
-          (err) => {
+          (err) => { //fallback to use Google Geolocation API
             geolocation();
           }, {
             timeout: 10000,
           });
-      } else {
+      } else { //fallback to use Google Geolocation API
         geolocation();
       }
     });
@@ -125,7 +121,7 @@ class Weather extends Component {
         const { lat, lng } = resolvedArray[1];
         let params = encodeURI(`latlng=${lat},${lng}`);
         const url = geocodingAPI + '?' + params + '&key=' + GCPkey;
-        return fetch(url)
+        return fetch(url);
       })
       .then((res) => {
         if(!res.ok){
@@ -151,7 +147,7 @@ class Weather extends Component {
       })
       .catch((err) => {
         this.setState({ querying: false });
-        toast.error('[Geocoding] ' + err.message);
+        toast.error('[地理編碼] ' + err.message);
       });
   }
 
@@ -166,7 +162,7 @@ class Weather extends Component {
       this.getLocationWeather(distId);
     } else {
       this.setState({ querying: false });
-      toast.error('[Location ID] No matched');
+      toast.error('[地區ID]找不到相符');
     }
   }
 
@@ -187,41 +183,44 @@ class Weather extends Component {
           fetchTime: new Date(),
           fetchTimeStatus: '剛才'
         })
+        toast.info('天氣資訊已更新');
       })
       .catch((err) => {
         this.setState({ querying: false });
-        toast.error('[Weather] ' + err.message);
+        toast.error('[天氣錯誤] ' + err.message);
       });
   }
 
   computeTempHue (temp) {
-    let tempHue;
-    if (temp < 0) tempHue = 220;
-    else if (temp > 38) tempHue = 0;
-    else tempHue = 220 - parseInt((temp / 38) * 220);
-    return tempHue;
+    return temp < 0 ? 220 :
+      temp > 38 ? 0 :
+      220 - parseInt((temp / 38) * 220, 10);
   }
   
   render () {
+    let refreshClass = this.state.querying ? 'refreshBtn spin': 'refreshBtn';
+    let tempColor = `hsl(${this.state.tempHue},70%,60%)`;
+    let feltTempColor = `hsl(${this.state.feltTempHue},70%,60%)`;
+    let humidityColor = `hsl(200, 100%, ${ 100 - this.state.weatherInfo.humidity / 2 }%)`;
     return (
       <div className="weatherDiv">
         <span></span>
-        <button className={ this.state.querying ? 'refreshBtn spin': 'refreshBtn'} onClick={this.getWeather} disabled={ this.state.querying}>
+        <button className={refreshClass} onClick={this.getWeather} disabled={this.state.querying}>
           <img src={RefreshIcon} className="refreshIcon" alt="refresh"/>
         </button>
         <div>
-          <p>{ this.state.city } { this.state.dist }</p>
-          <h4>{ this.state.weatherInfo.desc }</h4>
+          <p id="position">{ this.state.city } { this.state.dist }</p>
+          <p id="weather">{ this.state.weatherInfo.desc }</p>
         </div>
         <div>
-          <h1 style={{ color: `hsl(${this.state.tempHue},70%,60%)` }}>{ this.state.weatherInfo.temperature } °C</h1>
-          <p className="feltTemp">體感
-            <span style={{ color: `hsl(${this.state.feltTempHue},70%,60%)` }}> { this.state.weatherInfo.felt_air_temp } °C</span>
+          <p id="temp" style={{color: tempColor}}>{ this.state.weatherInfo.temperature }°C</p>
+          <p id="feltTemp">體感
+            <span style={{color: feltTempColor}}> { this.state.weatherInfo.felt_air_temp }°C</span>
           </p>
-          <p className="humidity">濕度
-            <span style={{ color: `hsl(200, 100%, ${ 100 - this.state.weatherInfo.humidity / 2 }%)`}}> { this.state.weatherInfo.humidity } %</span>
+          <p id="humidity">濕度
+            <span style={{color: humidityColor}}> { this.state.weatherInfo.humidity }%</span>
           </p>
-          <small>{ this.state.fetchTimeStatus }更新</small>
+          <p><small>於 { this.state.fetchTimeStatus }更新</small></p>
         </div>
       </div>
     )

@@ -22,11 +22,11 @@ class Clock extends Component {
     return (
       <div className="clockDiv">
         <div className="clockLeft">
-          <span className="hrmm">{ format(this.state.date, 'hh:mm') }</span>
+          <span id="hrmm">{ format(this.state.date, 'hh:mm') }</span>
         </div>
         <div className="clockRight">
-          <span className="ampm">{ format(this.state.date, 'A') }</span>
-          <span className="seconds">{ format(this.state.date, 'ss') }</span>
+          <span id="ampm">{ format(this.state.date, 'A') }</span>
+          <span id="seconds">{ format(this.state.date, 'ss') }</span>
         </div>
       </div>
     )
