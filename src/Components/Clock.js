@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 
 class Clock extends Component {
   constructor(props){
@@ -9,14 +9,14 @@ class Clock extends Component {
     }
   }
   componentDidMount () {
-    this.timerId = setInterval(() => {
+    this.tick = setInterval(() => {
       this.setState({
         date: new Date()
       });
     }, 1000);
   }
   componentWillUnmount () {
-    clearInterval(this.timerId);
+    clearInterval(this.tick);
   }
   render () {
     return (

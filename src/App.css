@@ -28,6 +28,25 @@ html, body {
   flex-wrap: nowrap;
 }
 
+.clockRight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#hrmm {
+  font-size: 34vw;
+  font-weight: lighter;
+  line-height: 24vw;
+}
+
+#ampm,
+#seconds {
+  font-size: 7vw;
+  line-height: 18.5vw;
+}
+
 .weatherDiv {
   flex-grow: 1;
   text-align: center;
@@ -37,29 +56,6 @@ html, body {
   margin: 0.5rem;
 }
 
-#hrmm {
-  font-size: 34vw;
-  font-weight: lighter;
-  line-height: 24vw;
-}
-
-.clockRight {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-}
-
-#ampm,
-#seconds {
-  font-size: 7vw;
-  line-height: 18.5vw;
-}
-
-.refreshIcon {
-  width: 24px;
-  height: 24px;
-}
 
 .refreshBtn {
   background-color: #999;
@@ -67,9 +63,16 @@ html, body {
   border-radius: 50%;
   border: none;
   padding: 4px;
+  margin: 4px;
   width: 32px;
   height: 32px;
 }
+
+.refreshIcon {
+  width: 24px;
+  height: 24px;
+}
+
 
 .spin {
   animation-name: spin;
@@ -114,7 +117,7 @@ footer a {
   }
 }
 
-@media (min-width: 576px) {
+@media (min-width: 576px) and (orientation: landscape) {
   .App {
     flex-direction: row;
   }
@@ -131,7 +134,7 @@ footer a {
   }
 }
 
-@media (min-width: 992px) { 
+@media (min-width: 992px) and (orientation: landscape)  { 
   .App {
     flex-direction: row;
   }
@@ -147,17 +150,33 @@ footer a {
     line-height: 12rem;
   }
 
+  .refreshIcon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .refreshBtn {
+    padding: 6px;
+    margin: 6px;
+    width: 48px;
+    height: 48px;
+  }
+  
   #position{
     font-size: larger;
+  }
+
+  .weatherDiv p {
+    font-size: xx-large;
   }
 
   #weather{
     font-size: 28pt;
   }
-  
-  .weatherDiv p {
-    font-size: xx-large;
+  #temp {
+    font-size: 64pt;
   }
+  
   footer {
     padding: 2rem
   }

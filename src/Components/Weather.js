@@ -13,6 +13,7 @@ class Weather extends Component {
   constructor (props) {
     super(props);
     this.state = {
+      isOnline: true,
       dist: '',
       city: '',
       weatherInfo: {},
@@ -26,34 +27,44 @@ class Weather extends Component {
     this.getWeather = this.getWeather.bind(this);
     this.findLocationId = this.findLocationId.bind(this);
     this.getLocationWeather = this.getLocationWeather.bind(this);
-    this.updateFetchTimeStatus = this.updateFetchTimeStatus.bind(this);
     this.computeTempHue = this.computeTempHue.bind(this);
   }
 
   componentDidMount () {
     this.getWeather();
+
     this.updateTimer = setInterval(() => {
-      this.updateFetchTimeStatus();
-      if ( differenceInMinutes( new Date(), this.state.fetchTime ) >= 60){ // update weather when it is older than 1 hour
+      let status = distanceInWordsStrict(new Date(), this.state.fetchTime, {locale: localeTW}).concat('前');
+      this.setState({
+        fetchTimeStatus: status
+      });
+
+      if ((differenceInMinutes(new Date(), this.state.fetchTime) >= 60 )&& this.state.isOnline) { // update weather older than 1 hour
         this.getWeather();
       }
     }, 1000 * 60);
+
+    window.addEventListener('offline', () => {
+      this.setState({ isOnline: false });
+      toast.warn('沒有網路連線');
+    })
+
+    window.addEventListener('online', () => {
+      this.setState({ isOnline: true }, () => {
+        if (differenceInMinutes(new Date(), this.state.fetchTime) >= 60) {
+          this.getWeather();
+        }
+      });
+      toast.success('已連上網路');
+    })
   }
   
   componentWillUnmount () {
     clearInterval(this.updateTimer);
   }
 
-  updateFetchTimeStatus () {
-    let string = distanceInWordsStrict( new Date(), this.state.fetchTime, { locale: localeTW }).concat('前');
-    this.setState({
-      fetchTimeStatus: string
-    });
-  }
-
   getWeather () {
-    this.setState({ querying: true });
-    const getAllJson = new Promise((resolve, reject) => {
+    const checkAllJson = new Promise((resolve, reject) => {
       if (!this.state.allJson) {
         fetch('https://works.ioa.tw/weather/api/all.json')
           .then((res) => {
@@ -116,39 +127,44 @@ class Weather extends Component {
       }
     });
 
-    Promise.all([getAllJson, getPosition])
-      .then((resolvedArray) => {
-        const { lat, lng } = resolvedArray[1];
-        let params = encodeURI(`latlng=${lat},${lng}`);
-        const url = geocodingAPI + '?' + params + '&key=' + GCPkey;
-        return fetch(url);
-      })
-      .then((res) => {
-        if(!res.ok){
-          throw new Error(res.statusText);
-        }
-        return res.json();
-      })
-      .then(( {status, results, error_message} ) => {
-        if (status !== 'OK'){
-          throw new Error(error_message); 
-        }
-
-        if(results && results.length > 0){
-          let dist = results[0].address_components.find((c) => c.types[0] === 'administrative_area_level_3').long_name;
-          let city = results[0].address_components.find((c) => ( c.types[0] === 'administrative_area_level_1' || c.types[0] === 'administrative_area_level_2')).long_name;
-              
-          this.setState({ dist: dist, city: city }, () => { 
-            this.findLocationId();
-          });
-        } else {
-          throw new Error('No results'); 
-        }
-      })
-      .catch((err) => {
-        this.setState({ querying: false });
-        toast.error('[地理編碼] ' + err.message);
-      });
+    if (this.state.isOnline) {
+      this.setState({ querying: true });
+      Promise.all([checkAllJson, getPosition])
+        .then((resolvedArray) => {
+          const { lat, lng } = resolvedArray[1];
+          let params = encodeURI(`latlng=${lat},${lng}`);
+          const url = geocodingAPI + '?' + params + '&key=' + GCPkey;
+          return fetch(url);
+        })
+        .then((res) => {
+          if(!res.ok){
+            throw new Error(res.statusText);
+          }
+          return res.json();
+        })
+        .then(( {status, results, error_message} ) => {
+          if (status !== 'OK'){
+            throw new Error(error_message); 
+          }
+  
+          if(results && results.length > 0){
+            let dist = results[0].address_components.find((c) => c.types[0] === 'administrative_area_level_3').long_name;
+            let city = results[0].address_components.find((c) => ( c.types[0] === 'administrative_area_level_1' || c.types[0] === 'administrative_area_level_2')).long_name;
+                
+            this.setState({ dist: dist, city: city }, () => { 
+              this.findLocationId();
+            });
+          } else {
+            throw new Error('No results'); 
+          }
+        })
+        .catch((err) => {
+          this.setState({ querying: false });
+          toast.error('[地理編碼] ' + err.message);
+        });
+    } else {
+      toast.error('沒有網路連線，請開啟並連上網路後再試');
+    }
   }
 
   findLocationId () {
