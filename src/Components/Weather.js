@@ -5,28 +5,26 @@ import distanceInWordsStrict from 'date-fns/distance_in_words_strict'
 import differenceInMinutes from 'date-fns/difference_in_minutes'
 import localeTW from 'date-fns/locale/zh_tw';
 
-const geocodingAPI = 'https://maps.googleapis.com/maps/api/geocode/json';
 const geolocationAPI = 'https://www.googleapis.com/geolocation/v1/geolocate'
 const GCPkey = 'AIzaSyDNRfiwt-_A8_lrlzvqzjPeUNPFoyMwx5Y';
 
+const myApi = 'https://us-central1-ronnie-weather-clock.cloudfunctions.net/';
 class Weather extends Component {
   constructor (props) {
     super(props);
     this.state = {
       isOnline: true,
-      dist: '',
       city: '',
       weatherInfo: {},
       tempHue: 100,
       feltTempHue: 100,
-      querying: false,
+      isQuerying: false,
       allJson: null,
       fetchTime: new Date(),
       fetchTimeStatus: '尚未',
     };
+    this.getPosition = this.getPosition.bind(this);
     this.getWeather = this.getWeather.bind(this);
-    this.findLocationId = this.findLocationId.bind(this);
-    this.getLocationWeather = this.getLocationWeather.bind(this);
     this.computeTempHue = this.computeTempHue.bind(this);
   }
 
@@ -63,148 +61,90 @@ class Weather extends Component {
     clearInterval(this.updateTimer);
   }
 
-  getWeather () {
-    const checkAllJson = new Promise((resolve, reject) => {
-      if (!this.state.allJson) {
-        fetch('https://works.ioa.tw/weather/api/all.json')
-          .then((res) => {
-            if(!res.ok){
-              throw new Error(res.statusText);
-            }
-            return res.json();
-          })
-          .then((res) => {
-            this.setState({ allJson: res });
-            resolve(res);
-          })
-          .catch((err) => {
-            reject(new Error('[all.json] ' + err.message));
-          });
-      } else {
-        resolve(this.state.allJson);
-      }
-    });
-
-    const getPosition = new Promise((resolve, reject) => {
-      function geolocation () {
-        const url = geolocationAPI + '?key=' + GCPkey;
-        fetch(url, { method: 'POST' })
-          .then((res) => {
-            if(!res.ok){
-              throw new Error(res.statusText);
-            }
-            return res.json();
-          })
-          .then((data) => {
-            if (data.error) {
-              throw new Error(data.message);
-            }
-            resolve({
-              lat: data.location.lat,
-              lng: data.location.lng
-            });
-          })
-          .catch((err) => {
-            reject(new Error('[定位錯誤] ' + err.message));
-          });
-      }
-      
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => { 
-            resolve({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            });
-          },
-          (err) => { //fallback to use Google Geolocation API
-            geolocation();
-          }, {
-            timeout: 10000,
-          });
-      } else { //fallback to use Google Geolocation API
-        geolocation();
-      }
-    });
-
-    if (this.state.isOnline) {
-      this.setState({ querying: true });
-      Promise.all([checkAllJson, getPosition])
-        .then((resolvedArray) => {
-          const { lat, lng } = resolvedArray[1];
-          let params = encodeURI(`latlng=${lat},${lng}`);
-          const url = geocodingAPI + '?' + params + '&key=' + GCPkey;
-          return fetch(url);
-        })
-        .then((res) => {
+  getPosition () {
+    return new Promise((resolve, reject) => {
+      const geolocate = fetch(geolocationAPI + '?key=' + GCPkey, { method: 'POST' })
+        .then(res => {
           if(!res.ok){
             throw new Error(res.statusText);
           }
           return res.json();
         })
-        .then(( {status, results, error_message} ) => {
-          if (status !== 'OK'){
-            throw new Error(error_message); 
+        .then(data => {
+          if (data.error) {
+            throw new Error(data.message);
           }
-  
-          if(results && results.length > 0){
-            let dist = results[0].address_components.find((c) => c.types[0] === 'administrative_area_level_3').long_name;
-            let city = results[0].address_components.find((c) => ( c.types[0] === 'administrative_area_level_1' || c.types[0] === 'administrative_area_level_2')).long_name;
-                
-            this.setState({ dist: dist, city: city }, () => { 
-              this.findLocationId();
+          resolve({
+            lat: data.location.lat,
+            lng: data.location.lng
+          });
+        })
+        .catch(err => {
+          reject(new Error('[定位錯誤] ' + err.message));
+        });
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          position => { 
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
             });
-          } else {
-            throw new Error('No results'); 
+          },
+          err => { //fallback to use Google Geolocation API
+            return geolocate;
+          }, {
+            timeout: 10000,
+          });
+      } else { //fallback to use Google Geolocation API
+        return geolocate;
+      }
+    });
+  }
+  async getWeather () {
+    if (this.state.isOnline) {
+      this.setState({ isQuerying: true });
+      const {lat, lng} = await this.getPosition();
+      const url = new URL(myApi + 'weather');
+      url.search = new URLSearchParams({ lat, lng });
+
+      fetch(url)
+        .then(res => {
+          if(!res.ok){
+            throw new Error(res.statusText);
           }
+          return res.json();
+        })
+        .then(result => {
+          const T = result.main.temp;
+          const H = result.main.humidity;
+          const V = result.wind.speed;
+          const e = (H / 100) * 6.105 * Math.exp((17.27 * T)/(237.7 + T));
+          const AT = (1.07 * T) + (0.2 * e) - (0.65 * V) - 2.7;
+          this.setState({
+            isQuerying: false,
+            city: result.name,
+            fetchTime: new Date(),
+            fetchTimeStatus: '剛才',
+            weatherInfo: {
+              humidity: H,
+              temp: T.toFixed(1),
+              feltTemp: AT.toFixed(1),
+              windSpeed: V,
+              desc: result.weather[0].description
+            },
+            tempHue: this.computeTempHue(T),
+            feltTempHue: this.computeTempHue(AT)
+          });
+          toast.info('天氣資訊已更新');
         })
         .catch((err) => {
-          this.setState({ querying: false });
-          toast.error('[地理編碼] ' + err.message);
+          this.setState({ isQuerying: false });
+          toast.error('[天氣錯誤] ' + err.message);
         });
     } else {
       toast.error('沒有網路連線，請開啟並連上網路後再試');
     }
-  }
-
-  findLocationId () {
-    const list = this.state.allJson;
-    let distMatch = (town) => town.name === this.state.dist;
-    const distId = list
-      .filter((city) => city.name === this.state.city.slice(0,-1))
-      .find((city) => city.towns.find(distMatch)) // 嘉義、新竹縣市
-      .towns.find(distMatch).id;
-    if (distId) {
-      this.getLocationWeather(distId);
-    } else {
-      this.setState({ querying: false });
-      toast.error('[地區ID]找不到相符');
-    }
-  }
-
-  getLocationWeather (id) {
-    fetch(`https://works.ioa.tw/weather/api/weathers/${id}.json`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(res.statusText);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        this.setState({
-          querying: false,
-          weatherInfo: data,
-          tempHue: this.computeTempHue(data.temperature),
-          feltTempHue: this.computeTempHue(data.felt_air_temp),
-          fetchTime: new Date(),
-          fetchTimeStatus: '剛才'
-        })
-        toast.info('天氣資訊已更新');
-      })
-      .catch((err) => {
-        this.setState({ querying: false });
-        toast.error('[天氣錯誤] ' + err.message);
-      });
   }
 
   computeTempHue (temp) {
@@ -214,29 +154,30 @@ class Weather extends Component {
   }
   
   render () {
-    let refreshClass = this.state.querying ? 'refreshBtn spin': 'refreshBtn';
+    let refreshClass = this.state.isQuerying ? 'refreshBtn spin': 'refreshBtn';
     let tempColor = `hsl(${this.state.tempHue},70%,60%)`;
     let feltTempColor = `hsl(${this.state.feltTempHue},70%,60%)`;
     let humidityColor = `hsl(200, 100%, ${ 100 - this.state.weatherInfo.humidity / 2 }%)`;
     return (
       <div className="weatherDiv">
         <span></span>
-        <button className={refreshClass} onClick={this.getWeather} disabled={this.state.querying}>
+        <button className={refreshClass} onClick={this.getWeather} disabled={this.state.isQuerying}>
           <img src={RefreshIcon} className="refreshIcon" alt="refresh"/>
         </button>
         <div>
-          <p id="position">{ this.state.city } { this.state.dist }</p>
+          <p id="position">{ this.state.city }</p>
           <p id="weather">{ this.state.weatherInfo.desc }</p>
         </div>
         <div>
-          <p id="temp" style={{color: tempColor}}>{ this.state.weatherInfo.temperature }°C</p>
+          <p id="wind">風速 { this.state.weatherInfo.windSpeed } m/s</p>
+          <p id="temp" style={{color: tempColor}}>{ this.state.weatherInfo.temp }°C</p>
           <p id="feltTemp">體感
-            <span style={{color: feltTempColor}}> { this.state.weatherInfo.felt_air_temp }°C</span>
+            <span style={{color: feltTempColor}}> { this.state.weatherInfo.feltTemp }°C</span>
           </p>
           <p id="humidity">濕度
             <span style={{color: humidityColor}}> { this.state.weatherInfo.humidity }%</span>
           </p>
-          <p><small>於 { this.state.fetchTimeStatus }更新</small></p>
+          <p><small>於{ this.state.fetchTimeStatus }更新</small></p>
         </div>
       </div>
     )

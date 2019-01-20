@@ -5,18 +5,22 @@ class Clock extends Component {
   constructor(props){
     super(props);
     this.state = {
-      date: new Date()
-    }
+      date: null
+    };
+    this.tick = this.tick.bind(this);
   }
   componentDidMount () {
-    this.tick = setInterval(() => {
-      this.setState({
-        date: new Date()
-      });
-    }, 1000);
+    this.tick();
+    this.tickTimer = setInterval(this.tick, 1000);
   }
   componentWillUnmount () {
-    clearInterval(this.tick);
+    clearInterval(this.tickTimer);
+  }
+  tick (cb) {
+    this.setState({
+      date: new Date()
+    });
+    cb && cb();
   }
   render () {
     return (
