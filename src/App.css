@@ -115,13 +115,13 @@ button:focus {
   transition: all 0.3s ease-in-out;
   visibility: hidden;
   opacity: 0;
-  transform: translateX(110%);
+  transform: translateY(-20px);
 }
 
 #colorPicker.show {
   visibility: visible;
   opacity: 1;
-  transform: translateX(0%);
+  transform: translateY(0);
 }
 
 .overlay {
