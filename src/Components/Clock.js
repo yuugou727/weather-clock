@@ -24,7 +24,7 @@ class Clock extends Component {
   }
   render () {
     return (
-      <div className="clockDiv">
+      <div className="clockDiv glowText">
         <div className="clockLeft">
           <span id="hrmm">{ format(this.state.date, 'hh:mm') }</span>
         </div>

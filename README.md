@@ -2,14 +2,13 @@
 
 Demo: https://ronnie-weather-clock.firebaseapp.com
 
-一個簡易的天氣時鐘網頁，讓舊手機也能當天氣桌鐘使用，由於是PWA，Android 手機瀏覽頁面時可從瀏覽器右上的「選單 > 加到主畫面」的方式變成單獨App使用。天氣為計時一小時自動更新。
+一個簡易的天氣時鐘網頁，讓舊手機也能當天氣桌鐘使用，由於是PWA，Android 手機預設的 Chrome 瀏覽器會出現「加到主畫面」的選項，方便變成單獨App使用。天氣為每小時自動更新。
 
 
 # 使用API
 
-* [OA Wu 的台灣天氣資訊API](https://github.com/comdan66/weather)
+* [OpenWeatherMap](https://openweathermap.org)
 * [Google Geolocation API](https://developers.google.com/maps/documentation/geolocation/intro)
-* [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/intro)
 
 # 開發
 

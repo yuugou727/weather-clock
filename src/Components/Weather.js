@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import RefreshIcon from '../refresh.svg';
+import ColorPicker from './ColorPicker.js';
 import { toast } from 'react-toastify';
 import distanceInWordsStrict from 'date-fns/distance_in_words_strict'
 import differenceInMinutes from 'date-fns/difference_in_minutes'
@@ -13,6 +14,7 @@ class Weather extends Component {
   constructor (props) {
     super(props);
     this.state = {
+      showColorPicker: false,
       isOnline: true,
       city: '',
       weatherInfo: {},
@@ -26,6 +28,8 @@ class Weather extends Component {
     this.getPosition = this.getPosition.bind(this);
     this.getWeather = this.getWeather.bind(this);
     this.computeTempHue = this.computeTempHue.bind(this);
+    this.toggleColorPicker = this.toggleColorPicker.bind(this);
+    this.closeColorPicker = this.closeColorPicker.bind(this);
   }
 
   componentDidMount () {
@@ -59,6 +63,18 @@ class Weather extends Component {
   
   componentWillUnmount () {
     clearInterval(this.updateTimer);
+  }
+
+  toggleColorPicker() {
+    this.setState({
+      showColorPicker: !this.state.showColorPicker
+    });
+  }
+
+  closeColorPicker() {
+    this.setState({
+      showColorPicker: false
+    });
   }
 
   getPosition () {
@@ -160,10 +176,13 @@ class Weather extends Component {
     let humidityColor = `hsl(200, 100%, ${ 100 - this.state.weatherInfo.humidity / 2 }%)`;
     return (
       <div className="weatherDiv">
-        <span></span>
-        <button className={refreshClass} onClick={this.getWeather} disabled={this.state.isQuerying}>
-          <img src={RefreshIcon} className="refreshIcon" alt="refresh"/>
-        </button>
+        <div className="buttonGroup">
+          <button className={refreshClass} onClick={this.getWeather} disabled={this.state.isQuerying}>
+            <img src={RefreshIcon} id="refreshIcon" alt="refresh"/>
+          </button>
+          <button id="colorPickerBtn" onClick={this.toggleColorPicker}></button>
+        </div>
+        <ColorPicker show={this.state.showColorPicker} closeColorPicker={this.closeColorPicker}></ColorPicker>
         <div>
           <p id="position">{ this.state.city }</p>
           <p id="weather">{ this.state.weatherInfo.desc }</p>
@@ -177,7 +196,7 @@ class Weather extends Component {
           <p id="humidity">濕度
             <span style={{color: humidityColor}}> { this.state.weatherInfo.humidity }%</span>
           </p>
-          <p><small>於{ this.state.fetchTimeStatus }更新</small></p>
+          <p><small>於 { this.state.fetchTimeStatus }更新</small></p>
         </div>
       </div>
     )
