@@ -15,5 +15,8 @@
     "node-fetch": "^2.3.0",
     "qs": "^6.6.0"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": "8"
+  }
 }
