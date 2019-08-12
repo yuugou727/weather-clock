@@ -1,13 +1,12 @@
 const functions = require('firebase-functions');
-const cors = require('cors')({ origin: ['http://localhost:3000', 'https://ronnie-weather-clock.firebaseapp.com'] });
+const origins = [
+  'http://localhost:3000', 
+  'https://ronnie-weather-clock.web.app',
+  'https://ronnie-weather-clock.firebaseapp.com',
+];
+const cors = require('cors')({ origin: origins });
 const fetch = require('node-fetch')
 const qs = require('qs');
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
 
 const openWeatherMapAPI = 'http://api.openweathermap.org/data/2.5/';
 const OWMkey = '4b2f6cc61a8bdfba09c05dc8762510eb';
