@@ -1,41 +1,35 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-export default class ColorPicker extends Component{
-  constructor(props) {
-    super(props);
-    this.themes = [];
-    for ( let hue = 0; hue < 330; hue+= 30 ) {
-      this.themes.push(hue);
-    }
-    this.changeTheme = this.changeTheme.bind(this);
-  }
-
-  componentDidMount() {
+export default function ColorPicker(props) {
+  useEffect(() => {
     const overlay = document.querySelector('.overlay');
     overlay.addEventListener('click', () => {
-      this.props.closeColorPicker();
-    })
-  }
+      props.closeColorPicker();
+    });
+  }, [props]);
 
-  changeTheme(hue) {
+  const changeTheme = (hue) => {
     const root = document.documentElement;
     root.style.setProperty('--themeHue', hue);
   }
 
-  render() {
-    const themeBtns = this.themes.map((hue, idx) => (
-      <button onClick={() => this.changeTheme(hue)} key={idx} style={{ backgroundColor: `hsl(${hue}, 50%, 30%)`}} className="themeBtn"></button>
-    ))
-    return (
-      <div>
-        <div className="overlay" hidden={ !this.props.show }></div>
-        <div id="colorPicker" className={ this.props.show ? 'show': null }>
-          {themeBtns}
-        </div>
-      </div>
-    )
+  const themes = [];
+  for (let hue = 0; hue < 330; hue += 30) {
+    themes.push(hue);
   }
+  const themeBtns = themes.map((hue, idx) => (
+    <button onClick={() => changeTheme(hue)} key={idx} style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }} className="themeBtn"></button>
+  ));
+
+  return (
+    <div>
+      <div className="overlay" hidden={!props.show}></div>
+      <div id="colorPicker" className={props.show ? 'show' : null}>
+        {themeBtns}
+      </div>
+    </div>
+  );
 }
 
 ColorPicker.propTypes = {
