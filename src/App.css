@@ -20,7 +20,9 @@ button:focus {
 }
 
 .glowText {
+  color: white;
   text-shadow: 0 0 5px #ddd, 0 0 8px var(--glow), 0 0 16px var(--glow);
+  transition: text-shadow 1s ease-in-out;
 }
 
 .App {
@@ -34,9 +36,8 @@ button:focus {
 }
 
 .clockDiv {
-  flex-grow: 3;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
 }
@@ -61,8 +62,8 @@ button:focus {
 }
 
 .weatherDiv {
-  flex-grow: 1;
   text-align: center;
+  margin: 0 10px;
 }
 
 .weatherDiv p {
@@ -145,9 +146,14 @@ button:focus {
   font-size: smaller;
 }
 
+#icon {
+  background-color: rgb(135, 154, 179);
+  border-radius: 50%;
+  height: 14vh;
+}
+
 #weather {
-  font-weight: bolder;
-  font-size: 16pt;
+  font-size: 10pt;
 }
 
 #temp {
@@ -157,9 +163,9 @@ button:focus {
 
 footer {
   position: absolute;
+  text-align: center;
   bottom: 0;
   color: #666;
-  padding: 0 1rem;
   font-size: 9pt;
 }
 
@@ -169,11 +175,7 @@ footer a {
 }
 
 footer .version {
-  font-size: 9px;
   color: rgba(255, 255, 255, 0.25);
-  position: fixed;
-  bottom: 0px;
-  right: 0px;
 }
 
 @keyframes spin {
@@ -189,9 +191,6 @@ footer .version {
   .App {
     flex-direction: row;
   }
-  .clockDiv {
-    flex-grow: 1;
-  }
   #hrmm {
     font-size: 48vh;
     line-height: 32vh;
@@ -206,9 +205,6 @@ footer .version {
 @media (min-width: 992px) and (orientation: landscape) {
   .App {
     flex-direction: row;
-  }
-  .clockDiv {
-    flex-grow: 1;
   }
   #hrmm {
     font-size: 20rem;
@@ -241,7 +237,7 @@ footer .version {
   }
 
   #weather {
-    font-size: 28pt;
+    font-size: 20pt;
   }
   #temp {
     font-size: 64pt;

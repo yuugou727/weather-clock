@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import RefreshIcon from '../refresh.svg';
 import ColorPicker from './ColorPicker.js';
 import { toast } from 'react-toastify';
@@ -78,25 +78,21 @@ function Weather() {
           return res.json();
         })
         .then(result => {
-          const T = result.main.temp;
-          const H = result.main.humidity;
-          const V = result.wind.speed;
-          const e = (H / 100) * 6.105 * Math.exp((17.27 * T) / (237.7 + T));
-          const AT = (1.07 * T) + (0.2 * e) - (0.65 * V) - 2.7;
-
+          const { temp, feels_like, humidity, wind_speed, weather } = result.current;
           setIsQuerying(false);
           setFetchTime(new Date());
           setFetchTimeStatus('剛才');
           setCity(result.name);
           setWeatherInfo({
-            humidity: H,
-            temp: T.toFixed(1),
-            feltTemp: AT.toFixed(1),
-            windSpeed: V,
-            desc: result.weather[0].description
+            humidity,
+            temp: temp.toFixed(1),
+            feltTemp: feels_like.toFixed(1),
+            windSpeed: wind_speed,
+            icon: weather[0].icon,
+            desc: weather[0].description
           });
-          setTempHue(computeTempHue(T));
-          setFeltTempHue(computeTempHue(AT));
+          setTempHue(computeTempHue(temp));
+          setFeltTempHue(computeTempHue(feels_like));
           toast.info('天氣資訊已更新');
         })
         .catch((err) => {
@@ -152,7 +148,6 @@ function Weather() {
   const tempColor = `hsl(${tempHue},70%,60%)`;
   const feltTempColor = `hsl(${feltTempHue},70%,60%)`;
   const humidityColor = `hsl(200, 100%, ${100 - weatherInfo.humidity / 2}%)`;
-  const ColorPickerMemo = memo(ColorPicker);
   return (
     <div className="weatherDiv">
       <div className="buttonGroup">
@@ -161,9 +156,10 @@ function Weather() {
         </button>
         <button id="colorPickerBtn" onClick={() => setShowColorPicker(!showColorPicker)}></button>
       </div>
-      <ColorPickerMemo show={showColorPicker} closeColorPicker={() => setShowColorPicker(false)}></ColorPickerMemo>
+      <ColorPicker show={showColorPicker} closeColorPicker={() => setShowColorPicker(false)}></ColorPicker>
       <div>
         <p id="position">{city}</p>
+        <img crossOrigin="anonymous" id="icon" src={ weatherInfo.icon ? `https://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png` : '' }/>
         <p id="weather">{weatherInfo.desc}</p>
       </div>
       <div>
