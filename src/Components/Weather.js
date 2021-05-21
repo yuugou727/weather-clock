@@ -1,22 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import RefreshIcon from '../refresh.svg';
+import ChartIcon from '../chart.svg';
 import ColorPicker from './ColorPicker.js';
+import HourlyWeather from './HourlyWeather.js';
 import { toast } from 'react-toastify';
-import distanceInWordsStrict from 'date-fns/distance_in_words_strict'
-import differenceInMinutes from 'date-fns/difference_in_minutes'
-import localeTW from 'date-fns/locale/zh_tw';
+import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
+import { zhTW } from 'date-fns/locale'
 
-const geolocationAPI = 'https://www.googleapis.com/geolocation/v1/geolocate'
+// Google Cloud Platform
+const geolocationAPI = 'https://www.googleapis.com/geolocation/v1/geolocate';
 const GCPkey = 'AIzaSyDNRfiwt-_A8_lrlzvqzjPeUNPFoyMwx5Y';
-const myApi = 'https://us-central1-ronnie-weather-clock.cloudfunctions.net/';
 
+const myAPI = process.env.NODE_ENV !== 'production' ?
+  'http://localhost:5000/ronnie-weather-clock/us-central1/' :
+  'https://us-central1-ronnie-weather-clock.cloudfunctions.net/';
+const weatherAPI = myAPI + 'weather';
 
 function Weather() {
   const [isOnline, setIsOnline] = useState(true);
   const [fetchTime, setFetchTime] = useState(new Date());
   const [fetchTimeStatus, setFetchTimeStatus] = useState('尚未');
 
-  const getPosition = useCallback(() => {
+  const getGeoLocation = useCallback(() => {
     return new Promise((resolve, reject) => {
       const geolocate = fetch(geolocationAPI + '?key=' + GCPkey, { method: 'POST' })
         .then(res => {
@@ -57,17 +62,16 @@ function Weather() {
     });
   }, []);
 
-  const [isQuerying, setIsQuerying] = useState(false);
   const [city, setCity] = useState('');
-  const [weatherInfo, setWeatherInfo] = useState({});
-  const [tempHue, setTempHue] = useState(100);
-  const [feltTempHue, setFeltTempHue] = useState(100);
+  const [isQuerying, setIsQuerying] = useState(false);
+  const [currentWeather, setCurrentWeather] = useState({});
+  const [hourlyWeather, setHourlyWeather] = useState([]);
 
   const getWeather = useCallback(async () => {
     if (isOnline) {
       setIsQuerying(true);
-      const { lat, lng } = await getPosition();
-      const url = new URL(myApi + 'weather');
+      const { lat, lng } = await getGeoLocation();
+      const url = new URL(weatherAPI);
       url.search = new URLSearchParams({ lat, lng });
 
       fetch(url)
@@ -78,21 +82,20 @@ function Weather() {
           return res.json();
         })
         .then(result => {
-          const { temp, feels_like, humidity, wind_speed, weather } = result.current;
+          const { temp, feels_like, humidity, weather } = result.current;
           setIsQuerying(false);
           setFetchTime(new Date());
           setFetchTimeStatus('剛才');
           setCity(result.name);
-          setWeatherInfo({
+          setCurrentWeather({
             humidity,
             temp: temp.toFixed(1),
             feltTemp: feels_like.toFixed(1),
-            windSpeed: wind_speed,
             icon: weather[0].icon,
             desc: weather[0].description
           });
-          setTempHue(computeTempHue(temp));
-          setFeltTempHue(computeTempHue(feels_like));
+
+          setHourlyWeather(result.hourly.slice(0, 24));
           toast.info('天氣資訊已更新');
         })
         .catch((err) => {
@@ -102,15 +105,15 @@ function Weather() {
     } else {
       toast.error('沒有網路連線，請開啟並連上網路後再試');
     }
-  }, [isOnline, getPosition]);
+  }, [isOnline, getGeoLocation]);
 
   useEffect(() => {
     getWeather();
-  }, [getWeather]);
+  }, []);
 
   useEffect(() => {
     const updateTimer = setInterval(() => {
-      let status = distanceInWordsStrict(new Date(), fetchTime, { locale: localeTW }).concat('前');
+      let status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
       setFetchTimeStatus(status);
       if ((differenceInMinutes(new Date(), fetchTime) >= 60) && isOnline) { // update weather older than 1 hour
         getWeather();
@@ -119,21 +122,28 @@ function Weather() {
     return () => {
       clearInterval(updateTimer);
     };
-  }, []);
+  }, [fetchTime]);
 
   useEffect(() => {
-    window.addEventListener('offline', () => {
+    const offlineListener = () => {
       setIsOnline(false);
       toast.warn('沒有網路連線');
-    })
-    window.addEventListener('online', () => {
+    };
+    const onlineListener = () => {
       setIsOnline(true, () => {
         if (differenceInMinutes(new Date(), fetchTime) >= 60) {
           getWeather();
         }
       });
       toast.success('已連上網路');
-    })
+    };
+
+    window.addEventListener('offline', offlineListener);
+    window.addEventListener('online', onlineListener);
+    return () => {
+      window.removeEventListener('offline', offlineListener);
+      window.removeEventListener('online', onlineListener)
+    }
   }, [])
 
   function computeTempHue(temp) {
@@ -143,33 +153,36 @@ function Weather() {
   }
 
   const [showColorPicker, setShowColorPicker] = useState(false);
-
-  const refreshClass = isQuerying ? 'refreshBtn spin' : 'refreshBtn';
-  const tempColor = `hsl(${tempHue},70%,60%)`;
-  const feltTempColor = `hsl(${feltTempHue},70%,60%)`;
-  const humidityColor = `hsl(200, 100%, ${100 - weatherInfo.humidity / 2}%)`;
+  const [showHourlyWeather, setShowHourlyWeather] = useState(false);
+  const refreshClass = isQuerying ? 'spin' : '';
+  const tempColor = `hsl(${computeTempHue(currentWeather.temp)},70%,60%)`;
+  const feltTempColor = `hsl(${computeTempHue(currentWeather.feltTemp)},70%,60%)`;
+  const humidityColor = `hsl(200, 100%, ${100 - currentWeather.humidity / 2}%)`;
   return (
     <div className="weatherDiv">
+      <HourlyWeather show={showHourlyWeather} closeHourlyWeather={() => setShowHourlyWeather(false)} weatherInfo={hourlyWeather}></HourlyWeather>
       <div className="buttonGroup">
-        <button className={refreshClass} onClick={() => getWeather()} disabled={isQuerying}>
-          <img src={RefreshIcon} id="refreshIcon" alt="refresh" />
+        <button id="refreshBtn" className={refreshClass} onClick={() => getWeather()} disabled={isQuerying}>
+          <img src={RefreshIcon} className="refreshIcon" alt="refresh" />
         </button>
-        <button id="colorPickerBtn" onClick={() => setShowColorPicker(!showColorPicker)}></button>
+        <button id="colorPickerBtn" onClick={() => setShowColorPicker(!showColorPicker)} title="color-picker"></button>
+        <button id="hourlyWeatherBtn" onClick={() => setShowHourlyWeather(!showColorPicker)} title="hourly-weather">
+          <img src={ChartIcon} alt="hourly" />
+        </button>
       </div>
       <ColorPicker show={showColorPicker} closeColorPicker={() => setShowColorPicker(false)}></ColorPicker>
       <div>
-        <p id="position">{city}</p>
-        <img crossOrigin="anonymous" id="icon" src={ weatherInfo.icon ? `https://openweathermap.org/img/wn/${weatherInfo.icon}@2x.png` : '' }/>
-        <p id="weather">{weatherInfo.desc}</p>
+        <p className="location">{city}</p>
+        <img className="weatherIcon" src={currentWeather.icon ? `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` : ''} title={currentWeather.desc} crossOrigin="anonymous" />
+        <p className="weather">{currentWeather.desc}</p>
       </div>
       <div>
-        <p id="wind">風速 {weatherInfo.windSpeed} m/s</p>
-        <p id="temp" style={{ color: tempColor }}>{weatherInfo.temp}°C</p>
-        <p id="feltTemp">體感
-            <span style={{ color: feltTempColor }}> {weatherInfo.feltTemp}°C</span>
+        <p className="temp" style={{ color: tempColor }}>{currentWeather.temp}°C</p>
+        <p className="feltTemp">體感
+          <span style={{ color: feltTempColor }}> {currentWeather.feltTemp}°C</span>
         </p>
-        <p id="humidity">濕度
-            <span style={{ color: humidityColor }}> {weatherInfo.humidity}%</span>
+        <p className="humidity">濕度
+          <span style={{ color: humidityColor }}> {currentWeather.humidity}%</span>
         </p>
         <p><small>於 {fetchTimeStatus}更新</small></p>
       </div>

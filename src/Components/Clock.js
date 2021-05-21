@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 
 function Clock() {
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState(new Date());
   useEffect(() => {
     const tickTimer = setInterval(() => {
       setDate(new Date())
-    }, 1000);
+    }, 100);
     return () => {
       clearInterval(tickTimer);
     }
@@ -18,7 +18,7 @@ function Clock() {
         <span id="hrmm">{format(date, 'hh:mm')}</span>
       </div>
       <div className="clockRight">
-        <span id="ampm">{format(date, 'A')}</span>
+        <span id="ampm">{format(date, 'a')}</span>
         <span id="seconds">{format(date, 'ss')}</span>
       </div>
     </div>

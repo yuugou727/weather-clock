@@ -64,27 +64,37 @@ button:focus {
 .weatherDiv {
   text-align: center;
   margin: 0 10px;
+
+  p {
+    margin: 0.2rem;
+  }
 }
 
-.weatherDiv p {
-  margin: 0.2rem;
-}
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 20px 0;
 
-.refreshBtn {
-  background-color: #bbb;
-  outline: none;
-  border-radius: 50%;
-  border: none;
-  padding: 4px;
-  margin: 0.5rem;
-  width: 32px;
-  height: 32px;
-  box-shadow: 0 0 10px var(--glow);
-}
+  button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--glow);
+    margin: 0 8px;
 
-#refreshIcon {
-  width: 24px;
-  height: 24px;
+    &#refreshBtn,
+    &#hourlyWeatherBtn {
+      background-color: #bbb;
+      outline: none;
+      border: none;
+      padding: 8px;
+    }
+    &#colorPickerBtn {
+      border: 2px solid #ddd;
+      background-color: var(--bgc);
+    }
+  }
 }
 
 .spin {
@@ -92,37 +102,6 @@ button:focus {
   animation-duration: 1s;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
-}
-
-#colorPickerBtn {
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  margin: 0.5rem;
-  border: 2px solid #ddd;
-  background-color: var(--bgc);
-}
-
-#colorPicker {
-  z-index: 100;
-  position: absolute;
-  border-radius: 0.75rem;
-  right: 20px;
-  padding: 10px;
-  margin: 20px;
-  max-width: 280px;
-  box-shadow: 0 0 2px #ddd, 0 0 10px var(--glow);
-  background-color: rgba(0, 0, 0, 0.7);
-  transition: all 0.3s ease-in-out;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-20px);
-}
-
-#colorPicker.show {
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .overlay {
@@ -134,6 +113,40 @@ button:focus {
   width: 100%;
 }
 
+@mixin modalBase {
+  z-index: 100;
+  position: absolute;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 2px #ddd, 0 0 10px var(--glow);
+  background-color: rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease-out;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-20px) scaleY(0.6);
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+#colorPicker {
+  @include modalBase();
+  right: 20px;
+  padding: 10px;
+  margin: 20px;
+  max-width: 280px;
+}
+
+#hourlyWeatherModal {
+  @include modalBase();
+  bottom: 20px;
+  right: 7vw;
+  width: 80vw;
+  height: 320px;
+  padding: 10px;
+}
+
 .themeBtn {
   border-radius: 50%;
   width: 32px;
@@ -142,21 +155,21 @@ button:focus {
   border: 2px solid #ddd;
 }
 
-#position {
+.location {
   font-size: smaller;
 }
 
-#icon {
+.weatherIcon {
   background-color: rgb(135, 154, 179);
   border-radius: 50%;
   height: 14vh;
 }
 
-#weather {
+.weather {
   font-size: 10pt;
 }
 
-#temp {
+.temp {
   font-size: 3rem;
   font-weight: lighter;
 }
@@ -167,15 +180,13 @@ footer {
   bottom: 0;
   color: #666;
   font-size: 9pt;
-}
-
-footer a {
-  color: #3fc7d1;
-  text-decoration: none;
-}
-
-footer .version {
-  color: rgba(255, 255, 255, 0.25);
+  a {
+    color: #3fc7d1;
+    text-decoration: none;
+  }
+  .version {
+    color: rgba(255, 255, 255, 0.25);
+  }
 }
 
 @keyframes spin {
@@ -221,14 +232,15 @@ footer .version {
     height: 36px;
   }
 
-  .refreshBtn {
-    padding: 6px;
-    margin: 6px;
+  .buttonGroup button {
     width: 48px;
     height: 48px;
+    margin: 6px;
+    padding: 6px;
+    border-radius: 50%;
   }
 
-  #position {
+  .location {
     font-size: larger;
   }
 
@@ -236,11 +248,19 @@ footer .version {
     font-size: xx-large;
   }
 
-  #weather {
+  .weather {
     font-size: 20pt;
   }
-  #temp {
+  .temp {
     font-size: 64pt;
+  }
+
+  #hourlyWeatherModal {
+    bottom: 10vh;
+    right: 10vw;
+    height: 45vh;
+    width: 65vw;
+    padding: 30px;
   }
 
   footer {

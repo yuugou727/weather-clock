@@ -8,6 +8,7 @@ const cors = require('cors')({ origin: origins });
 const fetch = require('node-fetch')
 const qs = require('qs');
 
+// Open Weather
 const openWeatherMapAPI = 'https://api.openweathermap.org/data/2.5/';
 const OWMkey = '1c56e5d44390d340fda11cb956125832';
 

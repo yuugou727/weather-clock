@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-export default function ColorPicker(props) {
+const ColorPicker = memo(function(props) {
   useEffect(() => {
-    const overlay = document.querySelector('.overlay');
-    overlay.addEventListener('click', () => {
+    const overlay = document.querySelector('#colorPickerOverlay');
+    const clickListener = () => {
       props.closeColorPicker();
-    });
-  }, [props]);
+    };
+    overlay.addEventListener('click', clickListener);
+    return () => {
+      overlay.removeEventListener('click', clickListener);
+    }
+  }, [props.show]);
 
   const changeTheme = (hue) => {
     const root = document.documentElement;
@@ -24,15 +28,17 @@ export default function ColorPicker(props) {
 
   return (
     <div>
-      <div className="overlay" hidden={!props.show}></div>
+      <div id="colorPickerOverlay" className="overlay" hidden={!props.show}></div>
       <div id="colorPicker" className={props.show ? 'show' : null}>
         {themeBtns}
       </div>
     </div>
   );
-}
+})
 
 ColorPicker.propTypes = {
   show: PropTypes.bool,
   closeColorPicker: PropTypes.func,
 }
+
+export default ColorPicker;
