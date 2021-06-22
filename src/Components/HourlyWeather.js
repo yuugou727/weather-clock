@@ -24,7 +24,7 @@ export default function HourlyWeather(props) {
 
   const getGradient = useCallback(
     (ctx, chartArea) => {
-      const temps = props.weatherInfo.map(hr => hr.temp.toFixed(1));
+      const temps = props.weatherInfo.map(hr => hr.feels_like.toFixed(1));
       const maxTemp = temps.length > 0 ? Math.max.apply(null, temps) : 32;
       const minTemp = temps.length > 0 ? Math.min.apply(null, temps) : 16;
       const midTemp = (maxTemp + minTemp) / 2;
@@ -47,41 +47,57 @@ export default function HourlyWeather(props) {
     [props.weatherInfo],
   );
 
-  const data = useMemo(
-    () => ({
-      datasets: [
-        {
-          data: props.weatherInfo.map(hr => ({
-            time: format((hr.dt * 1000), 'E haaa'),
-            temp: hr.temp.toFixed(1),
-            icon: hr.weather[0].icon
-          })),
-          tension: 0.5,
-          borderWidth: 5,
-          borderColor: (context) => {
-            const chart = context.chart;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) {
-              // This case happens on initial chart load
-              return null;
-            }
-            return getGradient(ctx, chartArea);
-          },
-        },
-      ],
-    }),
+  const weatherData = useMemo(
+    () => props.weatherInfo.map(hr => ({
+      time: format((hr.dt * 1000), 'E haaa'),
+      temp: hr.temp.toFixed(1),
+      feltTemp: hr.feels_like.toFixed(1),
+      icon: hr.weather[0].icon
+    })),
     [props.weatherInfo]
   );
+
+  const data = {
+    datasets: [
+      {
+        label: '天氣與溫度',
+        data: weatherData,
+        parsing: {
+          xAxisKey: 'time',
+          yAxisKey: 'temp'
+        },
+        borderColor: '#879ab3',
+      },
+      {
+        label: '體感',
+        data: weatherData,
+        parsing: {
+          xAxisKey: 'time',
+          yAxisKey: 'feltTemp'
+        },
+        borderColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) {
+            // This case happens on initial chart load
+            return null;
+          }
+          return getGradient(ctx, chartArea);
+        },
+      }
+    ],
+  };
 
   const iconLabelPlugin = useMemo(
     () => ({
       afterDraw: (chart, easingValue) => {
         const ctx = chart.ctx;
-        chart.getDatasetMeta(0).data.forEach((data, i, arr) => {
-          const icon = data.$context.raw.icon;
-          const preIcon = i === 0 ? '' : arr[i - 1].$context.raw.icon;
+        const rawData = chart.getDatasetMeta(0)._dataset.data;
+        chart.getDatasetMeta(0).data.forEach((data, i) => {
+          const icon = rawData[i].icon;
+          const preIcon = i === 0 ? '' : rawData[i - 1].icon;
           if (icon !== preIcon) {
-            const color = tempHSL(data.$context.raw.temp);
+            const color = '#879ab3';
             const { x, y } = data;
             const image = new Image(16, 16);
             image.src = `https://openweathermap.org/img/wn/${icon}.png`;
@@ -107,6 +123,7 @@ export default function HourlyWeather(props) {
       y: {
         ticks: {
           callback: (value, index, values) => (value + '°'),
+          precision: 0,
         },
         grid: {
           color: 'rgba(255,255,255,0.2)',
@@ -119,10 +136,8 @@ export default function HourlyWeather(props) {
         }
       }
     },
-    parsing: {
-      xAxisKey: 'time',
-      yAxisKey: 'temp'
-    },
+    tension: 0.5,
+    borderWidth: 5,
     plugins: {
       legend: {
         display: false

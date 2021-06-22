@@ -15,6 +15,7 @@ const myAPI = process.env.NODE_ENV !== 'production' ?
   'http://localhost:5000/ronnie-weather-clock/us-central1/' :
   'https://us-central1-ronnie-weather-clock.cloudfunctions.net/';
 const weatherAPI = myAPI + 'weather';
+const reverseGeocodingAPI = myAPI + 'reverseGeocoding';
 
 function Weather() {
   const [isOnline, setIsOnline] = useState(true);
@@ -86,7 +87,6 @@ function Weather() {
           setIsQuerying(false);
           setFetchTime(new Date());
           setFetchTimeStatus('剛才');
-          setCity(result.name);
           setCurrentWeather({
             humidity,
             temp: temp.toFixed(1),
@@ -96,14 +96,32 @@ function Weather() {
           });
 
           setHourlyWeather(result.hourly.slice(0, 24));
-          toast.info('天氣資訊已更新');
+          // toast.info('天氣資訊已更新');
         })
         .catch((err) => {
           setIsQuerying(false);
           toast.error('[天氣錯誤] ' + err.message);
         });
+
+      const revGeoUrl = new URL(reverseGeocodingAPI);
+      revGeoUrl.search = new URLSearchParams({ lat, lng });
+      fetch(revGeoUrl)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(res.statusText);
+          }
+          return res.json();
+        })
+        .then(result => {
+          const { local_names } = result[0];
+          setCity(local_names.ascii);
+        })
+        .catch((err) => {
+          toast.error('[地理查詢錯誤] ' + err.message);
+        });;
+
     } else {
-      toast.error('沒有網路連線，請開啟並連上網路後再試');
+      toast.error('沒有網路連線，請連上網路後再試');
     }
   }, [isOnline, getGeoLocation]);
 
@@ -118,7 +136,7 @@ function Weather() {
       if ((differenceInMinutes(new Date(), fetchTime) >= 60) && isOnline) { // update weather older than 1 hour
         getWeather();
       }
-    }, 1000 * 60);
+    }, 1000 * 5);
     return () => {
       clearInterval(updateTimer);
     };
@@ -127,7 +145,7 @@ function Weather() {
   useEffect(() => {
     const offlineListener = () => {
       setIsOnline(false);
-      toast.warn('沒有網路連線');
+      // toast.warn('沒有網路連線');
     };
     const onlineListener = () => {
       setIsOnline(true, () => {
@@ -135,7 +153,7 @@ function Weather() {
           getWeather();
         }
       });
-      toast.success('已連上網路');
+      // toast.success('已連上網路');
     };
 
     window.addEventListener('offline', offlineListener);
@@ -172,8 +190,8 @@ function Weather() {
       </div>
       <ColorPicker show={showColorPicker} closeColorPicker={() => setShowColorPicker(false)}></ColorPicker>
       <div>
-        <p className="location">{city}</p>
         <img className="weatherIcon" src={currentWeather.icon ? `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` : ''} title={currentWeather.desc} crossOrigin="anonymous" />
+        <p className="location">{city}</p>
         <p className="weather">{currentWeather.desc}</p>
       </div>
       <div>

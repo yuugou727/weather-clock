@@ -7,7 +7,7 @@ import Clock from './Components/Clock.js';
 import Weather from './Components/Weather.js';
 
 function App() {
-  const version = '210521';
+  const version = '210621';
   return (
     <div className="App">
       <Clock />
