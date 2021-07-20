@@ -118,7 +118,7 @@ function Weather() {
         })
         .catch((err) => {
           toast.error('[地理查詢錯誤] ' + err.message);
-        });;
+        });
 
     } else {
       toast.error('沒有網路連線，請連上網路後再試');
@@ -148,11 +148,7 @@ function Weather() {
       // toast.warn('沒有網路連線');
     };
     const onlineListener = () => {
-      setIsOnline(true, () => {
-        if (differenceInMinutes(new Date(), fetchTime) >= 60) {
-          getWeather();
-        }
-      });
+      setIsOnline(true);
       // toast.success('已連上網路');
     };
 
@@ -163,6 +159,12 @@ function Weather() {
       window.removeEventListener('online', onlineListener)
     }
   }, [])
+
+  useEffect(() => {
+    if (isOnline && differenceInMinutes(new Date(), fetchTime) >= 60) {
+      getWeather();
+    }
+  }, [isOnline]);
 
   function computeTempHue(temp) {
     return temp < 0 ? 220 :
