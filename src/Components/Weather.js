@@ -7,15 +7,13 @@ import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
 import { zhTW } from 'date-fns/locale'
 
-// Google Cloud Platform
-const geolocationAPI = 'https://www.googleapis.com/geolocation/v1/geolocate';
-const GCPkey = 'AIzaSyDNRfiwt-_A8_lrlzvqzjPeUNPFoyMwx5Y';
-
-const myAPI = process.env.NODE_ENV !== 'production' ?
-  'http://localhost:5000/ronnie-weather-clock/us-central1/' :
-  'https://us-central1-ronnie-weather-clock.cloudfunctions.net/';
-const weatherAPI = myAPI + 'weather';
-const reverseGeocodingAPI = myAPI + 'reverseGeocoding';
+// Envs: GCP Weather API and Key
+const {
+  REACT_APP_GEOLOCATION_API,
+  REACT_APP_GCP_KEY,
+  REACT_APP_WEATHER_API,
+  REACT_APP_GEOCODING_API,
+} = process.env;
 
 function Weather() {
   const [isOnline, setIsOnline] = useState(true);
@@ -24,7 +22,7 @@ function Weather() {
 
   const getGeoLocation = useCallback(() => {
     return new Promise((resolve, reject) => {
-      const geolocate = fetch(geolocationAPI + '?key=' + GCPkey, { method: 'POST' })
+      const geolocate = fetch(REACT_APP_GEOLOCATION_API + '?key=' + REACT_APP_GCP_KEY, { method: 'POST' })
         .then(res => {
           if (!res.ok) {
             throw new Error(res.statusText);
@@ -72,7 +70,7 @@ function Weather() {
     if (isOnline) {
       setIsQuerying(true);
       const { lat, lng } = await getGeoLocation();
-      const url = new URL(weatherAPI);
+      const url = new URL(REACT_APP_WEATHER_API);
       url.search = new URLSearchParams({ lat, lng });
 
       fetch(url)
@@ -103,7 +101,7 @@ function Weather() {
           toast.error('[天氣錯誤] ' + err.message);
         });
 
-      const revGeoUrl = new URL(reverseGeocodingAPI);
+      const revGeoUrl = new URL(REACT_APP_GEOCODING_API);
       revGeoUrl.search = new URLSearchParams({ lat, lng });
       fetch(revGeoUrl)
         .then(res => {

@@ -1,6 +1,6 @@
 {
   "name": "weather-clock",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "chart.js": "^3.4.1",
@@ -15,11 +15,11 @@
     "whatwg-fetch": "^3.6.2"
   },
   "scripts": {
-    "start": "npm --prefix functions/ run serve | react-scripts start ",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy --only hosting"
   },
   "devDependencies": {
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",

@@ -12,7 +12,7 @@ const qs = require('qs');
 // Open Weather
 const weatherAPI = 'https://api.openweathermap.org/data/2.5/onecall';
 const reverseGeocodingAPI = 'http://api.openweathermap.org/geo/1.0/reverse';
-const OWMkey = '1c56e5d44390d340fda11cb956125832';
+const OWMkey = functions.config().openweather.key;
 
 exports.weather = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
