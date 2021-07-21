@@ -191,12 +191,12 @@ function Weather() {
         </button>
       </div>
       <ColorPicker show={showColorPicker} closeColorPicker={() => setShowColorPicker(false)}></ColorPicker>
-      <div>
+      <div className="weatherInfo">
         <img className="weatherIcon" src={currentWeather.icon ? `https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png` : ''} title={currentWeather.desc} crossOrigin="anonymous" />
         <p className="location">{city}</p>
         <p className="weather">{currentWeather.desc}</p>
       </div>
-      <div>
+      <div className="weatherDetails">
         <p className="temp" style={{ color: tempColor }}>{currentWeather.temp}°C</p>
         <p className="feltTemp">體感
           <span style={{ color: feltTempColor }}> {currentWeather.feltTemp}°C</span>

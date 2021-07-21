@@ -4,6 +4,24 @@
   --glow: hsl(var(--themeHue), 75%, 50%);
 }
 
+$breakpoints: (
+  phone: 575px,
+  pad: 768px,
+  desktop: 1200px,
+);
+
+@mixin response($device, $orientation: null) {
+  @if $orientation {
+    @media (min-width: map-get($breakpoints, $device )) and (orientation: #{$orientation}) {
+      @content;
+    }
+  } @else {
+    @media (min-width: map-get($breakpoints, $device )) {
+      @content;
+    }
+  }
+}
+
 html,
 body {
   width: 100%;
@@ -26,13 +44,18 @@ button:focus {
 }
 
 .App {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   justify-content: space-around;
   align-items: center;
   flex-direction: column;
+
+  @media (orientation: landscape) {
+    flex-direction: row;
+  }
 }
 
 .clockDiv {
@@ -50,23 +73,47 @@ button:focus {
 }
 
 #hrmm {
-  font-size: 34vw;
+  font-size: 32vw;
   font-weight: lighter;
-  line-height: 24vw;
+
+  @media (orientation: landscape) {
+    font-size: 28vw;
+  }
 }
 
 #ampm,
 #seconds {
-  font-size: 7vw;
-  line-height: 18.5vw;
+  font-size: 5vw;
+  line-height: 11vh;
+  @media (orientation: landscape) {
+    font-size: 4vw;
+    line-height: 16vw;
+  }
 }
 
 .weatherDiv {
   text-align: center;
   margin: 0 10px;
-
   p {
-    margin: 0.2rem;
+    margin: 1.2vmin;
+  }
+}
+
+.weatherInfo {
+  font-size: 3vmin;
+  .location {
+    font-size: smaller;
+  }
+  .weather {
+    font-size: larger;
+  }
+}
+
+.weatherDetails {
+  font-size: 4vmin;
+  .temp {
+    font-size: 12vmin;
+    font-weight: lighter;
   }
 }
 
@@ -83,6 +130,14 @@ button:focus {
     box-shadow: 0 0 10px var(--glow);
     margin: 0 8px;
 
+    @include response(pad) {
+      width: 48px;
+      height: 48px;
+      margin: 6px;
+      padding: 6px;
+      border-radius: 50%;
+    }
+
     &#refreshBtn,
     &#hourlyWeatherBtn {
       background-color: #bbb;
@@ -94,6 +149,13 @@ button:focus {
       border: 2px solid #ddd;
       background-color: var(--bgc);
     }
+  }
+}
+
+.refreshIcon {
+  @include response(pad) {
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -140,11 +202,18 @@ button:focus {
 
 #hourlyWeatherModal {
   @include modalBase();
-  bottom: 20px;
-  right: 7vw;
+  bottom: 0;
+  left: 0;
   width: 80vw;
-  height: 320px;
-  padding: 10px;
+  height: 90vh;
+  max-height: 360px;
+  margin: 5vh 10vw;
+  @include response(pad) {
+    max-height: inherit;
+    width: 80vw;
+    height: 60vh;
+    margin: 20vh 10vw;
+  }
 }
 
 .themeBtn {
@@ -155,23 +224,10 @@ button:focus {
   border: 2px solid #ddd;
 }
 
-.location {
-  font-size: smaller;
-}
-
 .weatherIcon {
   background-color: rgb(135, 154, 179);
   border-radius: 50%;
   height: 14vh;
-}
-
-.weather {
-  font-size: 10pt;
-}
-
-.temp {
-  font-size: 3rem;
-  font-weight: lighter;
 }
 
 footer {
@@ -180,6 +236,9 @@ footer {
   bottom: 0;
   color: #666;
   font-size: 9pt;
+  @include response(desktop) {
+    padding: 2rem;
+  }
   a {
     color: #3fc7d1;
     text-decoration: none;
@@ -195,75 +254,5 @@ footer {
   }
   to {
     transform: rotate(-360deg);
-  }
-}
-
-@media (min-width: 576px) and (orientation: landscape) {
-  .App {
-    flex-direction: row;
-  }
-  #hrmm {
-    font-size: 48vh;
-    line-height: 32vh;
-  }
-  #ampm,
-  #seconds {
-    font-size: 8vh;
-    line-height: 30vh;
-  }
-}
-
-@media (min-width: 992px) and (orientation: landscape) {
-  .App {
-    flex-direction: row;
-  }
-  #hrmm {
-    font-size: 20rem;
-    line-height: 14rem;
-  }
-  #ampm,
-  #seconds {
-    font-size: 4rem;
-    line-height: 12rem;
-  }
-
-  .refreshIcon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .buttonGroup button {
-    width: 48px;
-    height: 48px;
-    margin: 6px;
-    padding: 6px;
-    border-radius: 50%;
-  }
-
-  .location {
-    font-size: larger;
-  }
-
-  .weatherDiv p {
-    font-size: xx-large;
-  }
-
-  .weather {
-    font-size: 20pt;
-  }
-  .temp {
-    font-size: 64pt;
-  }
-
-  #hourlyWeatherModal {
-    bottom: 10vh;
-    right: 10vw;
-    height: 45vh;
-    width: 65vw;
-    padding: 30px;
-  }
-
-  footer {
-    padding: 2rem;
   }
 }
