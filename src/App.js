@@ -4,18 +4,37 @@ import './App.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Clock from './Components/Clock.js';
-import Weather from './Components/Weather.js';
+import WeatherPanel from './Components/WeatherPanel.js';
 
 const { REACT_APP_VERSION } = process.env;
 function App() {
   return (
     <div className="App">
       <Clock />
-      <Weather />
+      <WeatherPanel />
       <footer>
-        <p><span className="version">v{REACT_APP_VERSION}</span> Hosted by <a href="https://yuugou727.github.io" target="_blank" rel="noopener noreferrer">Ronnie Chang</a>. Weather info by <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer">OpenWeather</a></p>
+        <p>
+          <span className="version">
+            v{REACT_APP_VERSION}
+          </span> Hosted by <a
+            href="https://yuugou727.github.io"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Ronnie Chang</a>. Weather info by <a
+            href="https://openweathermap.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >OpenWeather</a>
+        </p>
       </footer>
-      <ToastContainer position="bottom-center" hideProgressBar newestOnTop={false} closeOnClick rtl={false} pauseOnHover />
+      <ToastContainer
+        position="bottom-center"
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnHover
+      />
     </div>
   );
 }

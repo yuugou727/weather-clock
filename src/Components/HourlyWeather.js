@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
@@ -57,7 +57,8 @@ const HourlyWeather = (props) => {
     time: format((hr.dt * 1000), 'E haaa'),
     temp: hr.temp.toFixed(1),
     feltTemp: hr.feels_like.toFixed(1),
-    icon: hr.weather[0].icon
+    icon: hr.weather[0].icon,
+    desc: hr.weather[0].description
   }));
 
   const data = useMemo(() => ({
@@ -101,11 +102,13 @@ const HourlyWeather = (props) => {
         const rawData = data.datasets[0].data;
 
         meta.data.forEach(({ x, y }, i) => {
-          const icon = rawData[i].icon;
+          const { icon, desc } = rawData[i];
           const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
           if (icon !== prevIcon) {
             const color = '#91a9b8';
             const image = new Image(iconSize, iconSize);
+            image.alt = desc;
+            image.crossOrigin = "anonymous";
             image.src = `https://openweathermap.org/img/wn/${icon}.png`;
             ctx.restore();
             ctx.strokeStyle = color;
@@ -176,19 +179,30 @@ const HourlyWeather = (props) => {
   };
 
   return (
-    <div>
-      <div id="hourlyWeatherOverlay" className="overlay" hidden={!props.show}></div>
-      <div id="hourlyWeatherModal" className={props.show ? 'show' : null}>
-        {props.show && <Line data={data} options={options} plugins={[iconLabelPlugin]}></Line>}
+    <Fragment>
+      <div
+        id="hourlyWeatherOverlay"
+        className="overlay"
+        hidden={!props.show}>
       </div>
-    </div>
+      <div
+        id="hourlyWeatherModal"
+        className={props.show ? 'show' : null}
+      >
+        <Line
+          data={data}
+          options={options}
+          plugins={[iconLabelPlugin]}
+        />
+      </div>
+    </Fragment>
   );
 };
 
 HourlyWeather.propTypes = {
-  show: PropTypes.bool,
-  closeHourlyWeather: PropTypes.func,
-  weatherInfo: PropTypes.array
+  show: PropTypes.bool.isRequired,
+  closeHourlyWeather: PropTypes.func.isRequired,
+  weatherInfo: PropTypes.array.isRequired
 };
 
 export default React.memo(HourlyWeather, (prevProps, nextProps) => {

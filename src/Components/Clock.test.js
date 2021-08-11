@@ -2,15 +2,24 @@ import { shallow, mount, render } from 'enzyme';
 import React from 'react';
 import Clock from './Clock.js';
 
-it('expect to render Clock component', () => {
-  expect(render(<Clock />));
+it.skip('renders without crashing', () => {
+  shallow(<Clock />);
 });
 
-it('expect to tick after mounted', () => {
-  const clock = mount(<Clock />);
-  expect(clock.state().date).not.toBeNull();
+describe('Clock', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
 
-  setTimeout(() => {
-    expect(clock.state().date).toBeNull();
-  }, 1000);
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('expect update interval works', () => {
+    const component = mount(<Clock />);
+    expect(setInterval).toHaveBeenCalledTimes(1);
+    component.unmount();
+    expect(clearInterval).toHaveBeenCalledTimes(1);
+  });
+
 });

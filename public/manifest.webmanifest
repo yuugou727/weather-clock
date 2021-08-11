@@ -15,8 +15,8 @@
   ],
   "start_url": "./index.html",
   "display": "fullscreen",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#000",
+  "background_color": "#000",
   "description": "簡易的時鐘網頁附加台灣天氣資訊，舊手機變身實用桌鐘",
   "dir": "ltr",
   "lang": "zh-TW"
