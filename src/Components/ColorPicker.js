@@ -1,7 +1,20 @@
 import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const ColorPicker = memo(function(props) {
+function* hueListGenerator(divided) {
+  const interval = Math.floor(360 / divided);
+  for (let hue = 0; hue <= (360 - interval); hue += interval) {
+    yield hue;
+  }
+}
+const themes = [...hueListGenerator(12)];
+
+const changeTheme = (hue) => {
+  const root = document.documentElement;
+  root.style.setProperty('--themeHue', hue);
+};
+
+const ColorPicker = (props) => {
   useEffect(() => {
     const overlay = document.querySelector('#colorPickerOverlay');
     const clickListener = () => {
@@ -13,32 +26,41 @@ const ColorPicker = memo(function(props) {
     }
   }, [props.show]);
 
-  const changeTheme = (hue) => {
-    const root = document.documentElement;
-    root.style.setProperty('--themeHue', hue);
-  }
-
-  const themes = [];
-  for (let hue = 0; hue < 330; hue += 30) {
-    themes.push(hue);
-  }
   const themeBtns = themes.map((hue, idx) => (
-    <button onClick={() => changeTheme(hue)} key={idx} style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }} className="themeBtn"></button>
+    <div
+      key={idx}
+      className="themeBtnWrapper"
+    >
+      <button
+        onClick={() => changeTheme(hue)}
+        style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }}
+        className="themeBtn"
+      >
+      </button>
+    </div>
   ));
 
   return (
     <div>
-      <div id="colorPickerOverlay" className="overlay" hidden={!props.show}></div>
-      <div id="colorPicker" className={props.show ? 'show' : null}>
-        {themeBtns}
+      <div
+        id="colorPickerOverlay"
+        className="overlay"
+        hidden={!props.show}
+      ></div>
+      <div
+        id="colorPicker"
+        className={props.show ? 'show' : null}
+      >{themeBtns}
       </div>
     </div>
   );
-})
+};
 
 ColorPicker.propTypes = {
   show: PropTypes.bool,
   closeColorPicker: PropTypes.func,
 }
 
-export default ColorPicker;
+export default memo(ColorPicker, (prevProps, nextProps) =>
+  prevProps.show === nextProps.show
+);

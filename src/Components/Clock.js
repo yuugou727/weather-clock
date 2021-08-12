@@ -6,20 +6,25 @@ function Clock() {
   useEffect(() => {
     const tickTimer = setInterval(() => {
       setDate(new Date())
-    }, 100);
+    }, 1000);
     return () => {
       clearInterval(tickTimer);
     }
   }, []);
 
   return (
+    date &&
     <div className="clockDiv glowText">
       <div className="clockLeft">
-        <span id="hrmm">{format(date, 'hh:mm')}</span>
+        <span className="hrmm">
+          {format(date, 'hh')}
+          <span className="blinking">:</span>
+          {format(date, 'mm')}
+        </span>
       </div>
       <div className="clockRight">
-        <span id="ampm">{format(date, 'a')}</span>
-        <span id="seconds">{format(date, 'ss')}</span>
+        <span className="ampm">{format(date, 'a')}</span>
+        <span className="seconds">{format(date, 'ss')}</span>
       </div>
     </div>
   )

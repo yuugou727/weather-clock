@@ -17,46 +17,70 @@ const {
   REACT_APP_GEOCODING_API,
 } = process.env;
 
-const WeatherPanel = () => {
-  const fromGeolocationAPI = async () => {
-    const res = await fetch(
-      REACT_APP_GEOLOCATION_API + '?key=' + REACT_APP_GCP_KEY,
-      { method: 'POST' }
-    );
-    if (!res.ok) {
-      throw new Error(res.statusText);
-    }
-    const geolocation = await res.json();
-    if (geolocation.error) {
-      throw new Error(geolocation.message);
-    }
-    const { lat, lng } = geolocation.location;
-    return ({ lat, lng });
-  };
+const fromGeolocationAPI = async () => {
+  const res = await fetch(
+    REACT_APP_GEOLOCATION_API + '?key=' + REACT_APP_GCP_KEY,
+    { method: 'POST' }
+  );
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+  const geolocation = await res.json();
+  if (geolocation.error) {
+    throw new Error(geolocation.message);
+  }
+  const { lat, lng } = geolocation.location;
+  return ({ lat, lng });
+};
 
-  const getGeoLocation = () => {
-    if ('geolocation' in navigator) {
-      return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            });
-          },
-          (err) => {
-            //fallback to use Google Geolocation API
-            resolve(fromGeolocationAPI());
-          }, {
+const getGeoLocation = () => {
+  if ('geolocation' in navigator) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (err) => {
+          //fallback to use Google Geolocation API
+          resolve(fromGeolocationAPI());
+        },
+        {
           timeout: 10000,
-        })
-      });
-    } else {
-      //fallback to use Google Geolocation API
-      return fromGeolocationAPI();
-    }
-  };
+        }
+      )
+    });
+  } else {
+    //fallback to use Google Geolocation API
+    return fromGeolocationAPI();
+  }
+};
 
+const weatherAPI = async (lat, lng) => {
+  const url = new URL(REACT_APP_WEATHER_API);
+  url.search = new URLSearchParams({ lat, lng });
+  const weatherResp = await fetch(url)
+  if (!weatherResp.ok) {
+    throw new Error(weatherResp.statusText);
+  }
+  const weather = await weatherResp.json();
+  return weather;
+}
+
+const reverseGeocodingAPI = async (lat, lng) => {
+  const revGeoUrl = new URL(REACT_APP_GEOCODING_API);
+  revGeoUrl.search = new URLSearchParams({ lat, lng });
+  const geocodingResp = await fetch(revGeoUrl);
+  if (!geocodingResp.ok) {
+    throw new Error(geocodingResp.statusText);
+  }
+  const geocoding = await geocodingResp.json();
+  return geocoding;
+}
+
+const WeatherPanel = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [fetchTime, setFetchTime] = useState(new Date());
   const [fetchTimeStatus, setFetchTimeStatus] = useState('尚未');
@@ -71,27 +95,32 @@ const WeatherPanel = () => {
       toast.error('沒有網路連線，請連上網路後再試');
       return;
     }
+    if (isQuerying) {
+      return;
+    }
     setIsQuerying(true);
 
     let location;
     try {
       location = await getGeoLocation();
     } catch (err) {
-      toast.error('[定位錯誤] ' + err.message)
+      setIsQuerying(false);
+      toast.error('[定位錯誤] ' + err)
+      throw err;
     }
 
     /** weather api */
-    const { lat, lng } = location;
-    const url = new URL(REACT_APP_WEATHER_API);
-    url.search = new URLSearchParams({ lat, lng });
-    const weatherResp = await fetch(url);
-    if (!weatherResp.ok) {
+    let weatherResult;
+    try {
+      const { lat, lng } = location;
+      weatherResult = await weatherAPI(lat, lng);
+    } catch (err) {
       setIsQuerying(false);
-      toast.error('[天氣錯誤] ' + weatherResp.statusText);
-      throw new Error(weatherResp.statusText);
+      toast.error('[天氣錯誤] ' + err);
+      throw err;
     }
-    const result = await weatherResp.json();
-    const { temp, feels_like, humidity, weather } = result.current;
+
+    const { temp, feels_like, humidity, weather } = weatherResult.current;
     setIsQuerying(false);
     setFetchTime(new Date());
     setFetchTimeStatus('剛才');
@@ -102,35 +131,37 @@ const WeatherPanel = () => {
       icon: weather[0].icon,
       desc: weather[0].description
     });
-    setHourlyWeather(result.hourly.slice(0, 24));
+    setHourlyWeather(weatherResult.hourly.slice(0, 24));
 
     /** reverse-geocoding api */
-    const revGeoUrl = new URL(REACT_APP_GEOCODING_API);
-    revGeoUrl.search = new URLSearchParams({ lat, lng });
-    const geocodingResp = await fetch(revGeoUrl);
-    if (!geocodingResp.ok) {
-      throw new Error(geocodingResp.statusText);
+    let geocoding;
+    try {
+      const { lat, lng } = location;
+      geocoding = await reverseGeocodingAPI(lat, lng);
+    } catch (err) {
+      throw err;
     }
-    const geocoding = await geocodingResp.json();
     setCity(geocoding[0].local_names.ascii);
-  }, [isOnline, getGeoLocation]);
+  }, [isOnline]);
 
   useEffect(() => {
     getWeather();
   }, []);
 
   useEffect(() => {
+    // check update status every 10 seconds
     const updateTimer = setInterval(() => {
       let status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
       setFetchTimeStatus(status);
-      if ((differenceInMinutes(new Date(), fetchTime) >= 60) && isOnline) { // update weather older than 1 hour
+      if (isOnline && (differenceInMinutes(new Date(), fetchTime) >= 60)) {
+        // update weather older than 1 hour
         getWeather();
       }
-    }, 1000 * 5);
+    }, 1000 * 10);
     return () => {
       clearInterval(updateTimer);
     };
-  }, [fetchTime]);
+  }, [fetchTime, isOnline]);
 
   useEffect(() => {
     const offlineListener = () => {
@@ -150,15 +181,8 @@ const WeatherPanel = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (isOnline && differenceInMinutes(new Date(), fetchTime) >= 60) {
-      getWeather();
-    }
-  }, [isOnline, fetchTime]);
-
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);
-
   return (
     <div className="weatherDiv">
       <ColorPicker

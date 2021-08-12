@@ -1,14 +1,49 @@
-import React, { useEffect, useCallback, useMemo, Fragment } from 'react';
+import React, { memo, useEffect, useCallback, useMemo, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 
-function tempHSL(temp = 24) {
+const iconLabelPlugin = {
+  afterDatasetsDraw: (chart, args, options) => {
+    const { ctx, chartArea, data } = chart;
+    if (!chartArea) {
+      return null;
+    }
+    const [xOffset, yOffset] = [0, 0];
+    const [iconSize, iconPadding] = [36, -4];
+
+    const meta = chart.getDatasetMeta(0); // render weather icon at datasets[0]
+    const rawData = data.datasets[0].data;
+
+    meta.data.forEach(({ x, y }, i) => {
+      const { icon, desc } = rawData[i];
+      const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
+      if (icon !== prevIcon) {
+        const color = '#91a9b8';
+        const image = new Image(iconSize, iconSize);
+        image.alt = desc;
+        image.crossOrigin = "anonymous";
+        image.src = `https://openweathermap.org/img/wn/${icon}.png`;
+        ctx.restore();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color
+        ctx.beginPath();
+        ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.fill();
+        ctx.drawImage(image, x - (iconSize / 2) - xOffset, y - (iconSize / 2) - yOffset, iconSize, iconSize);
+      }
+    })
+  }
+};
+
+const tempHSL = (temp = 24) => {
   const hue = temp < 0 ? 220 :
     temp > 38 ? 0 :
       220 - parseInt((temp / 38) * 220, 10);
   return `hsl(${hue},70%,60%)`;
-}
+};
+
 const HourlyWeather = (props) => {
   useEffect(() => {
     const overlay = document.querySelector('#hourlyWeatherOverlay');
@@ -20,7 +55,6 @@ const HourlyWeather = (props) => {
       overlay.removeEventListener('click', clickListener);
     }
   }, [props.show]);
-
 
   const createCtxGradient = useCallback(
     (context) => {
@@ -53,15 +87,18 @@ const HourlyWeather = (props) => {
     [props.weatherInfo],
   );
 
-  const weatherData = props.weatherInfo.map(hr => ({
-    time: format((hr.dt * 1000), 'E haaa'),
-    temp: hr.temp.toFixed(1),
-    feltTemp: hr.feels_like.toFixed(1),
-    icon: hr.weather[0].icon,
-    desc: hr.weather[0].description
-  }));
+  const weatherData = useMemo(() => props.weatherInfo
+    .map(hr => ({
+      time: format((hr.dt * 1000), 'E haaa'),
+      temp: hr.temp.toFixed(1),
+      feltTemp: hr.feels_like.toFixed(1),
+      icon: hr.weather[0].icon,
+      desc: hr.weather[0].description
+    })),
+    [props.weatherInfo]
+  );
 
-  const data = useMemo(() => ({
+  const data = {
     datasets: [
       {
         label: '溫度',
@@ -84,46 +121,7 @@ const HourlyWeather = (props) => {
         borderColor: createCtxGradient,
       }
     ],
-  }),
-    [props.weatherInfo]
-  );
-
-  const iconLabelPlugin = useMemo(
-    () => ({
-      afterDatasetsDraw: (chart, args, options) => {
-        const { ctx, chartArea, data } = chart;
-        if (!chartArea) {
-          return null;
-        }
-        const [xOffset, yOffset] = [0, 0];
-        const [iconSize, iconPadding] = [36, -4];
-
-        const meta = chart.getDatasetMeta(0); // render weather icon at datasets[0]
-        const rawData = data.datasets[0].data;
-
-        meta.data.forEach(({ x, y }, i) => {
-          const { icon, desc } = rawData[i];
-          const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
-          if (icon !== prevIcon) {
-            const color = '#91a9b8';
-            const image = new Image(iconSize, iconSize);
-            image.alt = desc;
-            image.crossOrigin = "anonymous";
-            image.src = `https://openweathermap.org/img/wn/${icon}.png`;
-            ctx.restore();
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color
-            ctx.beginPath();
-            ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
-            ctx.stroke();
-            ctx.fill();
-            ctx.drawImage(image, x - (iconSize / 2) - xOffset, y - (iconSize / 2) - yOffset, iconSize, iconSize);
-          }
-        })
-      }
-    }),
-    []
-  );
+  };
 
   const options = {
     maintainAspectRatio: false,
@@ -188,12 +186,14 @@ const HourlyWeather = (props) => {
       <div
         id="hourlyWeatherModal"
         className={props.show ? 'show' : null}
-      >
-        <Line
-          data={data}
-          options={options}
-          plugins={[iconLabelPlugin]}
-        />
+      > {
+          props.show &&
+          <Line
+            data={data}
+            options={options}
+            plugins={[iconLabelPlugin]}
+          />
+        }
       </div>
     </Fragment>
   );
@@ -205,7 +205,7 @@ HourlyWeather.propTypes = {
   weatherInfo: PropTypes.array.isRequired
 };
 
-export default React.memo(HourlyWeather, (prevProps, nextProps) => {
+export default memo(HourlyWeather, (prevProps, nextProps) => {
   return (prevProps.show === nextProps.show)
     && (prevProps.weatherInfo === nextProps.weatherInfo);
 });

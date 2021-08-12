@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import RefreshIcon from '../assets/refresh.svg';
 import ChartIcon from '../assets/chart.svg';
@@ -9,13 +9,12 @@ const ActionButtons = (props) => {
     <div className="actionButtons">
       <button
         id="refreshBtn"
-        className={isQuerying ? 'spin' : ''}
         onClick={onRefresh}
         disabled={isQuerying}
       >
         <img
           src={RefreshIcon}
-          className="refreshIcon"
+          className={`refreshIcon ${isQuerying ? 'spin' : ''}`}
           alt="refresh"
         />
       </button>
@@ -45,4 +44,7 @@ ActionButtons.propTypes = {
   onHourlyWeatherOpen: PropTypes.func.isRequired
 }
 
-export default ActionButtons;
+export default memo(ActionButtons, (prevProps, nextProps) => 
+  prevProps.isQuerying === nextProps.isQuerying 
+  && prevProps.onRefresh === nextProps.onRefresh
+);

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { memo, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 const computeTempHue = (temp) => {
@@ -50,4 +50,4 @@ CurrentWeather.propTypes = {
   fetchTimeStatus: PropTypes.string,
 }
 
-export default CurrentWeather;
+export default memo(CurrentWeather);

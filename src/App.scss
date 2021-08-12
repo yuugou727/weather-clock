@@ -12,11 +12,11 @@ $breakpoints: (
 
 @mixin response($device, $orientation: null) {
   @if $orientation {
-    @media (min-width: map-get($breakpoints, $device )) and (orientation: #{$orientation}) {
+    @media (min-width: map-get($breakpoints, $device)) and (orientation: #{$orientation}) {
       @content;
     }
   } @else {
-    @media (min-width: map-get($breakpoints, $device )) {
+    @media (min-width: map-get($breakpoints, $device)) {
       @content;
     }
   }
@@ -35,12 +35,6 @@ body {
 
 button:focus {
   outline: 0;
-}
-
-.glowText {
-  color: white;
-  text-shadow: 0 0 5px #ddd, 0 0 8px var(--glow), 0 0 16px var(--glow);
-  transition: text-shadow 1s ease-in-out;
 }
 
 .App {
@@ -63,6 +57,31 @@ button:focus {
   justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
+  &.glowText {
+    color: white;
+    text-shadow: 0 0 5px #ddd, 0 0 8px var(--glow), 0 0 16px var(--glow);
+    transition: text-shadow 1s ease-in-out;
+  }
+}
+
+.clockLeft {
+  .hrmm {
+    font-size: 32vw;
+    font-weight: lighter;
+
+    @media (orientation: landscape) {
+      font-size: 28vw;
+    }
+
+    .blinking {
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+  }
 }
 
 .clockRight {
@@ -70,24 +89,15 @@ button:focus {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-}
 
-#hrmm {
-  font-size: 32vw;
-  font-weight: lighter;
-
-  @media (orientation: landscape) {
-    font-size: 28vw;
-  }
-}
-
-#ampm,
-#seconds {
-  font-size: 5vw;
-  line-height: 11vh;
-  @media (orientation: landscape) {
-    font-size: 4vw;
-    line-height: 16vw;
+  .ampm,
+  .seconds {
+    font-size: 5vw;
+    line-height: 11vh;
+    @media (orientation: landscape) {
+      font-size: 4vw;
+      line-height: 16vw;
+    }
   }
 }
 
@@ -96,24 +106,6 @@ button:focus {
   margin: 0 10px;
   p {
     margin: 1.2vmin;
-  }
-}
-
-.weatherInfo {
-  font-size: 3vmin;
-  .location {
-    font-size: smaller;
-  }
-  .weather {
-    font-size: larger;
-  }
-}
-
-.weatherDetails {
-  font-size: 4vmin;
-  .temp {
-    font-size: 12vmin;
-    font-weight: lighter;
   }
 }
 
@@ -150,20 +142,51 @@ button:focus {
       background-color: var(--bgc);
     }
   }
-}
 
-.refreshIcon {
-  @include response(pad) {
-    width: 36px;
-    height: 36px;
+  .refreshIcon {
+    @include response(pad) {
+      width: 36px;
+      height: 36px;
+    }
+    &.spin {
+      animation-name: spin;
+      animation-duration: 1s;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(-360deg);
+      }
+    }
   }
 }
 
-.spin {
-  animation-name: spin;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
+.weatherInfo {
+  font-size: 3vmin;
+  .weatherIcon {
+    background-color: rgb(135, 154, 179);
+    border-radius: 50%;
+    height: 14vh;
+  }
+  .location {
+    font-size: smaller;
+  }
+  .weather {
+    font-size: larger;
+  }
+}
+
+.weatherDetails {
+  font-size: 4vmin;
+  .temp {
+    font-size: 12vmin;
+    font-weight: lighter;
+  }
 }
 
 .overlay {
@@ -194,10 +217,25 @@ button:focus {
 
 #colorPicker {
   @include modalBase();
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   right: 20px;
   padding: 10px;
   margin: 20px;
-  max-width: 280px;
+  max-width: 240px;
+
+  .themeBtnWrapper {
+    flex: 0 0 25%;
+
+    .themeBtn {
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      margin: 8px;
+      border: 2px solid #ddd;
+    }
+  }
 }
 
 #hourlyWeatherModal {
@@ -216,20 +254,6 @@ button:focus {
   }
 }
 
-.themeBtn {
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  margin: 5px;
-  border: 2px solid #ddd;
-}
-
-.weatherIcon {
-  background-color: rgb(135, 154, 179);
-  border-radius: 50%;
-  height: 14vh;
-}
-
 footer {
   position: absolute;
   text-align: center;
@@ -245,14 +269,5 @@ footer {
   }
   .version {
     color: rgba(255, 255, 255, 0.25);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-360deg);
   }
 }
