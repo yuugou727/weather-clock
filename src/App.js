@@ -3,8 +3,8 @@ import { ToastContainer } from 'react-toastify';
 import './App.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Clock from './Components/Clock.js';
-import WeatherPanel from './Components/WeatherPanel.js';
+import Clock from './Components/Clock.tsx';
+import WeatherPanel from './Components/WeatherPanel.tsx';
 
 const { REACT_APP_VERSION } = process.env;
 function App() {

@@ -40,7 +40,7 @@ const iconLabelPlugin = {
 const tempHSL = (temp = 24) => {
   const hue = temp < 0 ? 220 :
     temp > 38 ? 0 :
-      220 - parseInt((temp / 38) * 220, 10);
+      220 - Math.round((temp / 38) * 220);
   return `hsl(${hue},70%,60%)`;
 };
 
@@ -48,11 +48,11 @@ const HourlyWeather = (props) => {
   useEffect(() => {
     const overlay = document.querySelector('#hourlyWeatherOverlay');
     const clickListener = () => {
-      props.closeHourlyWeather();
+      overlay && props.closeHourlyWeather();
     };
-    overlay.addEventListener('click', clickListener);
+    overlay && overlay.addEventListener('click', clickListener);
     return () => {
-      overlay.removeEventListener('click', clickListener);
+      overlay && overlay.removeEventListener('click', clickListener);
     }
   }, [props.show]);
 
@@ -64,7 +64,7 @@ const HourlyWeather = (props) => {
         // This case happens on initial chart load
         return null;
       }
-      const temps = props.weatherInfo.map(hr => hr.feels_like.toFixed(1));
+      const temps = props.weatherInfo.map(hr => Math.round(hr.feels_like * 10) / 10);
       const maxTemp = temps.length > 0 ? Math.max.apply(null, temps) : 32;
       const minTemp = temps.length > 0 ? Math.min.apply(null, temps) : 16;
       const midTemp = (maxTemp + minTemp) / 2;
@@ -90,8 +90,8 @@ const HourlyWeather = (props) => {
   const weatherData = useMemo(() => props.weatherInfo
     .map(hr => ({
       time: format((hr.dt * 1000), 'E haaa'),
-      temp: hr.temp.toFixed(1),
-      feltTemp: hr.feels_like.toFixed(1),
+      temp: Math.round(hr.temp * 10) / 10,
+      feltTemp: Math.round(hr.feels_like * 10) / 10,
       icon: hr.weather[0].icon,
       desc: hr.weather[0].description
     })),
@@ -185,7 +185,7 @@ const HourlyWeather = (props) => {
       </div>
       <div
         id="hourlyWeatherModal"
-        className={props.show ? 'show' : null}
+        className={props.show ? 'show' : undefined}
       > {
           props.show &&
           <Line
@@ -207,5 +207,4 @@ HourlyWeather.propTypes = {
 
 export default memo(HourlyWeather, (prevProps, nextProps) => {
   return (prevProps.show === nextProps.show)
-    && (prevProps.weatherInfo === nextProps.weatherInfo);
 });

@@ -4,36 +4,20 @@ import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
 import { zhTW } from 'date-fns/locale'
 
-import ColorPicker from './ColorPicker.js';
+import ColorPicker from './ColorPicker';
 import ActionButtons from './ActionButtons';
-import CurrentWeather from './CurrentWeather.js';
+import { CurrentWeather, ICurrentWeather } from './CurrentWeather';
 const HourlyWeather = lazy(() => import('./HourlyWeather.js'))
+import {
+  ILocation,
+  IGeocoding,
+  IWeatherResp,
+  geolocationAPI,
+  weatherAPI,
+  reverseGeocodingAPI,
+} from '../API';
 
-// Envs: GCP Weather API and Key
-const {
-  REACT_APP_GEOLOCATION_API,
-  REACT_APP_GCP_KEY,
-  REACT_APP_WEATHER_API,
-  REACT_APP_GEOCODING_API,
-} = process.env;
-
-const fromGeolocationAPI = async () => {
-  const res = await fetch(
-    REACT_APP_GEOLOCATION_API + '?key=' + REACT_APP_GCP_KEY,
-    { method: 'POST' }
-  );
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
-  const geolocation = await res.json();
-  if (geolocation.error) {
-    throw new Error(geolocation.message);
-  }
-  const { lat, lng } = geolocation.location;
-  return ({ lat, lng });
-};
-
-const getGeoLocation = () => {
+const getGeoLocation = (): Promise<ILocation> => {
   if ('geolocation' in navigator) {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
@@ -45,7 +29,7 @@ const getGeoLocation = () => {
         },
         (err) => {
           //fallback to use Google Geolocation API
-          resolve(fromGeolocationAPI());
+          resolve(geolocationAPI());
         },
         {
           timeout: 10000,
@@ -54,41 +38,19 @@ const getGeoLocation = () => {
     });
   } else {
     //fallback to use Google Geolocation API
-    return fromGeolocationAPI();
+    return geolocationAPI();
   }
 };
 
-const weatherAPI = async (lat, lng) => {
-  const url = new URL(REACT_APP_WEATHER_API);
-  url.search = new URLSearchParams({ lat, lng });
-  const weatherResp = await fetch(url)
-  if (!weatherResp.ok) {
-    throw new Error(weatherResp.statusText);
-  }
-  const weather = await weatherResp.json();
-  return weather;
-}
-
-const reverseGeocodingAPI = async (lat, lng) => {
-  const revGeoUrl = new URL(REACT_APP_GEOCODING_API);
-  revGeoUrl.search = new URLSearchParams({ lat, lng });
-  const geocodingResp = await fetch(revGeoUrl);
-  if (!geocodingResp.ok) {
-    throw new Error(geocodingResp.statusText);
-  }
-  const geocoding = await geocodingResp.json();
-  return geocoding;
-}
-
 const WeatherPanel = () => {
-  const [isOnline, setIsOnline] = useState(true);
-  const [fetchTime, setFetchTime] = useState(new Date());
-  const [fetchTimeStatus, setFetchTimeStatus] = useState('尚未');
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [fetchTime, setFetchTime] = useState<Date>(new Date());
+  const [fetchTimeStatus, setFetchTimeStatus] = useState<string>('尚未');
 
-  const [city, setCity] = useState('');
-  const [isQuerying, setIsQuerying] = useState(false);
-  const [currentWeather, setCurrentWeather] = useState({});
-  const [hourlyWeather, setHourlyWeather] = useState([]);
+  const [city, setCity] = useState<string>('');
+  const [isQuerying, setIsQuerying] = useState<boolean>(false);
+  const [currentWeather, setCurrentWeather] = useState<ICurrentWeather | null>(null);
+  const [hourlyWeather, setHourlyWeather] = useState<IWeatherResp['hourly']>([]);
 
   const getWeather = useCallback(async () => {
     if (!isOnline) {
@@ -100,7 +62,7 @@ const WeatherPanel = () => {
     }
     setIsQuerying(true);
 
-    let location;
+    let location: ILocation;
     try {
       location = await getGeoLocation();
     } catch (err) {
@@ -110,7 +72,7 @@ const WeatherPanel = () => {
     }
 
     /** weather api */
-    let weatherResult;
+    let weatherResult: IWeatherResp;
     try {
       const { lat, lng } = location;
       weatherResult = await weatherAPI(lat, lng);
@@ -126,15 +88,15 @@ const WeatherPanel = () => {
     setFetchTimeStatus('剛才');
     setCurrentWeather({
       humidity,
-      temp: temp.toFixed(1),
-      feltTemp: feels_like.toFixed(1),
+      temp: Math.round(temp * 10) / 10,
+      feltTemp: Math.round(feels_like * 10) / 10,
       icon: weather[0].icon,
       desc: weather[0].description
     });
     setHourlyWeather(weatherResult.hourly.slice(0, 24));
 
     /** reverse-geocoding api */
-    let geocoding;
+    let geocoding: IGeocoding[];
     try {
       const { lat, lng } = location;
       geocoding = await reverseGeocodingAPI(lat, lng);

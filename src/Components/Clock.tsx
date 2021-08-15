@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 
-function Clock() {
-  const [date, setDate] = useState(new Date());
+const Clock = () => {
+  const [date, setDate] = useState<Date>(new Date());
   useEffect(() => {
     const tickTimer = setInterval(() => {
       setDate(new Date())

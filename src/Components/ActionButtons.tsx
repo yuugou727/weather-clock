@@ -1,9 +1,15 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
 import RefreshIcon from '../assets/refresh.svg';
 import ChartIcon from '../assets/chart.svg';
 
-const ActionButtons = (props) => {
+interface IProps {
+  isQuerying: boolean;
+  onRefresh: () => void;
+  onColorPickerOpen: () => void;
+  onHourlyWeatherOpen: () => void;
+}
+
+const ActionButtons = (props: IProps) => {
   const { isQuerying, onRefresh, onColorPickerOpen, onHourlyWeatherOpen } = props;
   return (
     <div className="actionButtons">
@@ -37,12 +43,6 @@ const ActionButtons = (props) => {
   )
 }
 
-ActionButtons.propTypes = {
-  isQuerying: PropTypes.bool.isRequired,
-  onRefresh: PropTypes.func.isRequired,
-  onColorPickerOpen: PropTypes.func.isRequired,
-  onHourlyWeatherOpen: PropTypes.func.isRequired
-}
 
 export default memo(ActionButtons, (prevProps, nextProps) => 
   prevProps.isQuerying === nextProps.isQuerying 
