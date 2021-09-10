@@ -1,4 +1,5 @@
 import React, { memo, Fragment } from 'react';
+import styles from './CurrentWeather.module.scss'
 
 const computeTempHue = (temp: number = 23): number => {
   return temp < 0 ? 220 :
@@ -27,26 +28,26 @@ export const CurrentWeather = memo((props: IProps) => {
   const humidityColor = `hsl(200, 100%, ${100 - (weather?.humidity || 60) / 2}%)`;
   return (
     <Fragment>
-      <div className="weatherInfo">
+      <div className={styles.weatherInfo}>
         <img
-          className="weatherIcon"
+          className={styles.weatherIcon}
           alt={weather?.desc}
           src={weather?.icon ? `https://openweathermap.org/img/wn/${weather.icon}@2x.png` : ''}
           crossOrigin="anonymous"
         />
-        <p className="location">{city}</p>
-        <p className="weather">{weather?.desc}</p>
+        <p className={styles.location}>{city}</p>
+        <p className={styles.weather}>{weather?.desc}</p>
       </div>
-      <div className="weatherDetails">
-        <p className="temp"
+      <div className={styles.weatherDetails}>
+        <p className={styles.temp}
           style={{ color: tempColor }}
         >{weather?.temp}°C</p>
-        <p className="feltTemp">體感
+        <p className={styles.feltTemp}>體感
           <span
             style={{ color: feltTempColor }}
           > {weather?.feltTemp}°C</span>
         </p>
-        <p className="humidity">濕度
+        <p className={styles.humidity}>濕度
           <span
             style={{ color: humidityColor }}
           > {weather?.humidity}%</span>

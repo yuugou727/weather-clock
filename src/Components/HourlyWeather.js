@@ -1,7 +1,8 @@
-import React, { memo, useEffect, useCallback, useMemo, Fragment } from 'react';
+import React, { memo, useCallback, useMemo, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
+import styles from './HourlyWeather.module.scss';
 
 const iconLabelPlugin = {
   afterDatasetsDraw: (chart, args, options) => {
@@ -45,17 +46,6 @@ const tempHSL = (temp = 24) => {
 };
 
 const HourlyWeather = (props) => {
-  useEffect(() => {
-    const overlay = document.querySelector('#hourlyWeatherOverlay');
-    const clickListener = () => {
-      overlay && props.closeHourlyWeather();
-    };
-    overlay && overlay.addEventListener('click', clickListener);
-    return () => {
-      overlay && overlay.removeEventListener('click', clickListener);
-    }
-  }, [props.show]);
-
   const createCtxGradient = useCallback(
     (context) => {
       const chart = context.chart;
@@ -176,17 +166,20 @@ const HourlyWeather = (props) => {
     }
   };
 
+  const overlayClickHandler = () => {
+    props.closeHourlyWeather();
+  };
+
   return (
     <Fragment>
       <div
-        id="hourlyWeatherOverlay"
         className="overlay"
-        hidden={!props.show}>
+        hidden={!props.show}
+        onClick={overlayClickHandler}
+      >
       </div>
-      <div
-        id="hourlyWeatherModal"
-        className={props.show ? 'show' : undefined}
-      > {
+      <div className={styles.hourlyWeatherModal + `${props.show ? ' show' : ''}`}>
+        {
           props.show &&
           <Line
             data={data}

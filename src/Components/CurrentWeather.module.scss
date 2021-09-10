@@ -1,0 +1,23 @@
+
+.weatherInfo {
+  font-size: 3vmin;
+  .weatherIcon {
+    background-color: rgb(135, 154, 179);
+    border-radius: 50%;
+    height: 14vh;
+  }
+  .location {
+    font-size: smaller;
+  }
+  .weather {
+    font-size: larger;
+  }
+}
+
+.weatherDetails {
+  font-size: 4vmin;
+  .temp {
+    font-size: 12vmin;
+    font-weight: lighter;
+  }
+}

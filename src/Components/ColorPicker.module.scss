@@ -1,0 +1,24 @@
+@import '../common.scss';
+
+.colorPicker {
+  @include modalBase();
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  right: 20px;
+  padding: 10px;
+  margin: 20px;
+  max-width: 240px;
+
+  .themeBtnWrapper {
+    flex: 0 0 25%;
+
+    .themeBtn {
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      margin: 8px;
+      border: 2px solid #ddd;
+    }
+  }
+}

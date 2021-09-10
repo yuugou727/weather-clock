@@ -1,0 +1,17 @@
+@import '../common.scss';
+
+.hourlyWeatherModal {
+  @include modalBase();
+  bottom: 0;
+  left: 0;
+  width: 80vw;
+  height: 90vh;
+  max-height: 360px;
+  margin: 5vh 10vw;
+  @include response(pad) {
+    max-height: inherit;
+    width: 80vw;
+    height: 60vh;
+    margin: 20vh 10vw;
+  }
+}

@@ -16,6 +16,7 @@ import {
   weatherAPI,
   reverseGeocodingAPI,
 } from '../API';
+import styles from './WeatherPanel.module.scss';
 
 const getGeoLocation = (): Promise<ILocation> => {
   if ('geolocation' in navigator) {
@@ -146,7 +147,7 @@ const WeatherPanel = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);
   return (
-    <div className="weatherDiv">
+    <div className={styles.root}>
       <ColorPicker
         show={showColorPicker}
         closeColorPicker={() => setShowColorPicker(false)}

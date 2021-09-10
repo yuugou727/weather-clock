@@ -1,0 +1,40 @@
+:root {
+  --themeHue: 180;
+  --bgc: hsl(var(--themeHue), 45%, 20%);
+  --glow: hsl(var(--themeHue), 75%, 50%);
+}
+
+$breakpoints: (
+  phone: 575px,
+  pad: 768px,
+  desktop: 1200px,
+);
+
+@mixin response($device, $orientation: null) {
+  @if $orientation {
+    @media (min-width: map-get($breakpoints, $device)) and (orientation: #{$orientation}) {
+      @content;
+    }
+  } @else {
+    @media (min-width: map-get($breakpoints, $device)) {
+      @content;
+    }
+  }
+}
+
+@mixin modalBase {
+  z-index: 100;
+  position: absolute;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 2px #ddd, 0 0 10px var(--glow);
+  background-color: rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease-out;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-20px) scaleY(0.6);
+  &:global(.show) {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}

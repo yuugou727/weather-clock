@@ -1,4 +1,5 @@
-import React, { Fragment, memo, useEffect } from 'react';
+import React, { Fragment, memo } from 'react';
+import styles from './ColorPicker.module.scss'
 
 function* hueListGenerator(divided: number) {
   const interval = Math.floor(360 / divided);
@@ -19,27 +20,16 @@ interface IProps {
 };
 
 const ColorPicker = (props: IProps) => {
-  useEffect(() => {
-    const overlay = document.querySelector('#colorPickerOverlay');
-    const clickListener = (): void => {
-      props.closeColorPicker();
-    };
-    overlay && overlay.addEventListener('click', clickListener);
-    return () => {
-      overlay && overlay.removeEventListener('click', clickListener);
-    }
-  }, [props.show]);
-
   const ThemeButtons = () => (
     <Fragment>{themes.map((hue, idx) => (
       <div
         key={idx}
-        className="themeBtnWrapper"
+        className={styles.themeBtnWrapper}
       >
         <button
           onClick={() => changeTheme(hue)}
           style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }}
-          className="themeBtn"
+          className={styles.themeBtn}
         >
         </button>
       </div>
@@ -47,17 +37,18 @@ const ColorPicker = (props: IProps) => {
     </Fragment>
   );
 
+  const overlayClickHandler = (): void => {
+    props.closeColorPicker();
+  };
+
   return (
     <div>
       <div
-        id="colorPickerOverlay"
         className="overlay"
         hidden={!props.show}
+        onClick={overlayClickHandler}
       ></div>
-      <div
-        id="colorPicker"
-        className={props.show ? 'show' : undefined}
-      >
+      <div className={styles.colorPicker + `${props.show ? ' show' : ''}`}>
         <ThemeButtons />
       </div>
     </div>

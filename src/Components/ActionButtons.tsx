@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import RefreshIcon from '../assets/refresh.svg';
 import ChartIcon from '../assets/chart.svg';
+import styles from './ActionButtons.module.scss';
 
 interface IProps {
   isQuerying: boolean;
@@ -12,31 +13,31 @@ interface IProps {
 const ActionButtons = (props: IProps) => {
   const { isQuerying, onRefresh, onColorPickerOpen, onHourlyWeatherOpen } = props;
   return (
-    <div className="actionButtons">
+    <div className={styles.root}>
       <button
-        id="refreshBtn"
+        className={styles.refreshBtn}
         onClick={onRefresh}
         disabled={isQuerying}
       >
         <img
           src={RefreshIcon}
-          className={`refreshIcon ${isQuerying ? 'spin' : ''}`}
+          className={styles.refreshIcon + `${isQuerying ? ' spin' : ''}`}
           alt="refresh"
         />
       </button>
       <button
-        id="colorPickerBtn"
+        className={styles.colorPickerBtn}
         onClick={onColorPickerOpen}
         title="color-picker"
       ></button>
       <button
-        id="hourlyWeatherBtn"
+        className={styles.hourlyWeatherBtn}
         onClick={onHourlyWeatherOpen}
         title="hourly-weather"
       >
         <img
           src={ChartIcon}
-          alt="hourly"
+          alt="hourly weather"
         />
       </button>
     </div>

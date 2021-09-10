@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import styles from './Clock.module.scss'
 
 const Clock = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -14,17 +15,17 @@ const Clock = () => {
 
   return (
     date &&
-    <div className="clockDiv glowText">
-      <div className="clockLeft">
-        <span className="hrmm">
+    <div className={styles.root}>
+      <div className={styles.left}>
+        <span className={styles.hrmm}>
           {format(date, 'hh')}
-          <span className="blinking">:</span>
+          <span className={styles.blinking}>:</span>
           {format(date, 'mm')}
         </span>
       </div>
-      <div className="clockRight">
-        <span className="ampm">{format(date, 'a')}</span>
-        <span className="seconds">{format(date, 'ss')}</span>
+      <div className={styles.right}>
+        <span className={styles.ampm}>{format(date, 'a')}</span>
+        <span className={styles.seconds}>{format(date, 'ss')}</span>
       </div>
     </div>
   )
