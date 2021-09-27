@@ -5,34 +5,44 @@ import { format } from 'date-fns';
 import styles from './HourlyWeather.module.scss';
 
 const iconLabelPlugin = {
-  afterDatasetsDraw: (chart, args, options) => {
+  afterRender: (chart, args, options) => {
     const { ctx, chartArea, data } = chart;
     if (!chartArea) {
       return null;
     }
-    const [xOffset, yOffset] = [0, 0];
-    const [iconSize, iconPadding] = [36, -4];
 
     const meta = chart.getDatasetMeta(0); // render weather icon at datasets[0]
     const rawData = data.datasets[0].data;
+
+    const [iconSize, iconPadding] = [36, -4];
+    const drawIcon = (x, y, iconImg) => {
+      const [xOffset, yOffset] = [0, 0];
+      const color = '#91a9b8';
+      ctx.restore();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color
+      ctx.beginPath();
+      ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.fill();
+      ctx.drawImage(
+        iconImg,
+        x - (iconSize / 2) - xOffset,
+        y - (iconSize / 2) - yOffset,
+        iconSize,
+        iconSize
+      );
+    }
 
     meta.data.forEach(({ x, y }, i) => {
       const { icon, desc } = rawData[i];
       const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
       if (icon !== prevIcon) {
-        const color = '#91a9b8';
         const image = new Image(iconSize, iconSize);
         image.alt = desc;
         image.crossOrigin = "anonymous";
+        image.onload = () => drawIcon(x, y, image);
         image.src = `https://openweathermap.org/img/wn/${icon}.png`;
-        ctx.restore();
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color
-        ctx.beginPath();
-        ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
-        ctx.stroke();
-        ctx.fill();
-        ctx.drawImage(image, x - (iconSize / 2) - xOffset, y - (iconSize / 2) - yOffset, iconSize, iconSize);
       }
     })
   }
