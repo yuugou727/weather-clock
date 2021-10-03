@@ -33,12 +33,14 @@ REACT_APP_GCP_KEY=你的GoogleCloud金鑰
 ```
 
 ### Firebase Functions 設定
->需連結或新建 Firebase 專案，並使用 functions（與 hosting，選用）服務，參考 [Firebase 指南](https://firebase.google.com/docs/functions/get-started)
+需連結或新建 Firebase 專案，並使用 functions（與 hosting，選用）服務，參考 [Firebase 指南](https://firebase.google.com/docs/functions/get-started)
 
-- 修改 `.env` 與 `.env.production` 的 `BACKEND_ENTRY` 路徑
-- 修改 `functions/index.js` 的 `origins` 白名單網域
-    >這些 localhost 路徑與 production 路徑應搭配你的 Firebase 專案，可在模擬、部署 functions 時的終端機訊息與 Firebase web console 中查詢
+> Firebase 專案的 `PROJECT_ID`、Hosting 網域可在 Firebase web console 查看，也會出現在模擬、部署 functions 時的終端機訊息中
 
+- 置換 `.env` 檔案中 `REACT_APP_API` 路徑的 PROJECT_ID
+    ```.env
+    REACT_APP_API=http://localhost:5000/PROJECT_ID/us-central1/
+    ```
 - 於 functions 資料夾下指令，將金鑰設定至環境變數：
     ```sh
     firebase functions:config:set openweather.key="你的OpenWeatherMap金鑰"

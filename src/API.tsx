@@ -2,8 +2,7 @@
 const {
   REACT_APP_GEOLOCATION_API,
   REACT_APP_GCP_KEY,
-  REACT_APP_WEATHER_API,
-  REACT_APP_GEOCODING_API,
+  REACT_APP_API,
 } = process.env;
 
 export interface ILocation {
@@ -91,16 +90,8 @@ export type IWeatherResp = {
 };
 
 export const weatherAPI = async (lat: number, lng: number): Promise<IWeatherResp> => {
-  const api = REACT_APP_WEATHER_API;
-  if (!api) {
-    throw new Error('Weather API path not defined');
-  }
-  const url = new URL(api);
-  url.search = new URLSearchParams({
-    lat: lat.toString(),
-    lng: lng.toString()
-  }).toString();
-  const weatherResp: Response = await fetch(url.toString())
+  const api = `${REACT_APP_API}/weather?lat=${lat}&lng=${lng}`;
+  const weatherResp: Response = await fetch(api)
   if (!weatherResp.ok) {
     throw new Error(weatherResp.statusText);
   }
@@ -122,16 +113,8 @@ export interface IGeocoding {
 }
 
 export const reverseGeocodingAPI = async (lat: number, lng: number): Promise<IGeocoding[]> => {
-  const api = REACT_APP_GEOCODING_API;
-  if (!api) {
-    throw new Error('Reverse geocoding API path not defined');
-  }
-  const revGeoUrl = new URL(api);
-  revGeoUrl.search = new URLSearchParams({
-    lat: lat.toString(),
-    lng: lng.toString()
-  }).toString();
-  const geocodingResp: Response = await fetch(revGeoUrl.toString());
+  const api = `${REACT_APP_API}/reverseGeocoding?lat=${lat}&lng=${lng}`;
+  const geocodingResp: Response = await fetch(api);
   if (!geocodingResp.ok) {
     throw new Error(geocodingResp.statusText);
   }

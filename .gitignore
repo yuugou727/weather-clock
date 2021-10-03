@@ -10,8 +10,8 @@
 /build
 .firebase
 .firebaserc
-firebase.json
 firebase-debug.log*
+ui-debug.log
 
 # misc
 .DS_Store

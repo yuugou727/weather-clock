@@ -1,9 +1,10 @@
 const functions = require('firebase-functions');
+const PROJECT_ID = process.env.GCLOUD_PROJECT;
 const origins = process.env.NODE_ENV !== 'production'
-  ? ['http://localhost:3000']
+  ? ['http://localhost:3000']  // react local dev
   : [
-    'https://ronnie-weather-clock.web.app',
-    'https://ronnie-weather-clock.firebaseapp.com',
+    `https://${PROJECT_ID}.web.app`,
+    `https://${PROJECT_ID}.firebaseapp.com`,
   ];
 const cors = require('cors')({ origin: origins });
 const fetch = require('node-fetch')
