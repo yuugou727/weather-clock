@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 
 import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
-import { zhTW } from 'date-fns/locale'
+import { zhTW } from 'date-fns/locale';
 
 import ColorPicker from './ColorPicker';
 import ActionButtons from './ActionButtons';
 import { CurrentWeather, ICurrentWeather } from './CurrentWeather';
-const HourlyWeather = lazy(() => import('./HourlyWeather.js'))
+const HourlyWeather = lazy(() => import('./HourlyWeather'));
 import {
   ILocation,
   IGeocoding,

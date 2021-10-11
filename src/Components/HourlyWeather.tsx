@@ -1,30 +1,55 @@
 import React, { memo, useCallback, useMemo, Fragment } from 'react';
-import PropTypes from 'prop-types';
+import { ChartData } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
+import { IWeatherResp } from '../API';
 import styles from './HourlyWeather.module.scss';
 
-const iconLabelPlugin = {
-  afterRender: (chart, args, options) => {
+const iconLabelPlugin: any = {
+  iconSize: 36,
+  iconPadding: -4,
+  xOffset: 0,
+  yOffset: 0,
+  circleColor: '#91a9b8',
+  afterDraw(chart: any, args: any, options: any): void {
     const { ctx, chartArea, data } = chart;
     if (!chartArea) {
-      return null;
+      return;
     }
-
     const meta = chart.getDatasetMeta(0); // render weather icon at datasets[0]
     const rawData = data.datasets[0].data;
 
-    const [iconSize, iconPadding] = [36, -4];
-    const drawIcon = (x, y, iconImg) => {
-      const [xOffset, yOffset] = [0, 0];
-      const color = '#91a9b8';
+    const { iconSize, iconPadding, xOffset, yOffset, circleColor } = this;
+    meta.data.forEach((metaData: any, i: number) => {
+      const { x, y } = metaData;
+      const { icon, desc } = rawData[i];
+      const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
+      if (icon !== prevIcon) {
+        if (!rawData[i].image) {
+          const image = new Image(iconSize, iconSize);
+          image.alt = desc;
+          image.crossOrigin = 'anonymous';
+          image.src = `https://openweathermap.org/img/wn/${icon}.png`;
+          rawData[i].image = image;
+          rawData[i].image.onload = drawIcon(ctx, x, y, image);
+        }
+        drawCircle(ctx, x, y);
+        if (rawData[i].image.complete) {
+          drawIcon(ctx, x, y, rawData[i].image);
+        }
+      }
+    })
+    function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number): void {
       ctx.restore();
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color
+      ctx.strokeStyle = circleColor;
+      ctx.fillStyle = circleColor;
       ctx.beginPath();
       ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.fill();
+    }
+    function drawIcon(ctx: CanvasRenderingContext2D, x: number, y: number, iconImg: HTMLImageElement): void {
+      ctx.restore();
       ctx.drawImage(
         iconImg,
         x - (iconSize / 2) - xOffset,
@@ -33,29 +58,23 @@ const iconLabelPlugin = {
         iconSize
       );
     }
-
-    meta.data.forEach(({ x, y }, i) => {
-      const { icon, desc } = rawData[i];
-      const prevIcon = i === 0 ? '' : rawData[i - 1].icon;
-      if (icon !== prevIcon) {
-        const image = new Image(iconSize, iconSize);
-        image.alt = desc;
-        image.crossOrigin = "anonymous";
-        image.onload = () => drawIcon(x, y, image);
-        image.src = `https://openweathermap.org/img/wn/${icon}.png`;
-      }
-    })
   }
 };
 
-const tempHSL = (temp = 24) => {
+const tempHSL = (temp = 24): string => {
   const hue = temp < 0 ? 220 :
     temp > 38 ? 0 :
       220 - Math.round((temp / 38) * 220);
   return `hsl(${hue},70%,60%)`;
 };
 
-const HourlyWeather = (props) => {
+interface IProps {
+  show: boolean;
+  closeHourlyWeather: () => void;
+  weatherInfo: IWeatherResp['hourly'];
+}
+
+const HourlyWeather = (props: IProps) => {
   const createCtxGradient = useCallback(
     (context) => {
       const chart = context.chart;
@@ -87,8 +106,8 @@ const HourlyWeather = (props) => {
     [props.weatherInfo],
   );
 
-  const weatherData = useMemo(() => props.weatherInfo
-    .map(hr => ({
+  const weatherData: any[] = useMemo(() => props.weatherInfo
+    .map((hr) => ({
       time: format((hr.dt * 1000), 'E haaa'),
       temp: Math.round(hr.temp * 10) / 10,
       feltTemp: Math.round(hr.feels_like * 10) / 10,
@@ -98,7 +117,7 @@ const HourlyWeather = (props) => {
     [props.weatherInfo]
   );
 
-  const data = {
+  const data: ChartData = {
     datasets: [
       {
         label: '溫度',
@@ -123,7 +142,7 @@ const HourlyWeather = (props) => {
     ],
   };
 
-  const options = {
+  const options: any = {
     maintainAspectRatio: false,
     interaction: {
       mode: 'index',
@@ -132,7 +151,7 @@ const HourlyWeather = (props) => {
     scales: {
       y: {
         ticks: {
-          callback: (value, index, values) => (value + '°'),
+          callback: (value: string | number , index: number, values: any) => (value + '°'),
           precision: 0,
         },
         grid: {
@@ -153,7 +172,7 @@ const HourlyWeather = (props) => {
     borderWidth: 6,
     plugins: {
       legend: {
-        onClick: (event) => event.native.preventDefault(),
+        onClick: (event: any) => event.native.preventDefault(),
         labels: {
           usePointStyle: true
         }
@@ -161,7 +180,7 @@ const HourlyWeather = (props) => {
       tooltip: {
         usePointStyle: true,
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -180,6 +199,7 @@ const HourlyWeather = (props) => {
     props.closeHourlyWeather();
   };
 
+  const plugins: any = [iconLabelPlugin];
   return (
     <Fragment>
       <div
@@ -194,18 +214,12 @@ const HourlyWeather = (props) => {
           <Line
             data={data}
             options={options}
-            plugins={[iconLabelPlugin]}
+            plugins={plugins}
           />
         }
       </div>
     </Fragment>
   );
-};
-
-HourlyWeather.propTypes = {
-  show: PropTypes.bool.isRequired,
-  closeHourlyWeather: PropTypes.func.isRequired,
-  weatherInfo: PropTypes.array.isRequired
 };
 
 export default memo(HourlyWeather, (prevProps, nextProps) => {

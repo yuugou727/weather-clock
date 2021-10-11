@@ -3,11 +3,11 @@ import { ToastContainer } from 'react-toastify';
 import './App.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Clock from './Components/Clock.tsx';
-import WeatherPanel from './Components/WeatherPanel.tsx';
+import Clock from './Components/Clock';
+import WeatherPanel from './Components/WeatherPanel';
 
 const { REACT_APP_VERSION } = process.env;
-function App() {
+const App = () => {
   return (
     <div className="App">
       <Clock />
