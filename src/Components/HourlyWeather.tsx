@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, Fragment } from 'react';
-import { ChartData } from 'chart.js';
+import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { IWeatherResp } from '../API';
@@ -11,7 +11,7 @@ const iconLabelPlugin: any = {
   xOffset: 0,
   yOffset: 0,
   circleColor: '#91a9b8',
-  afterDraw(chart: any, args: any, options: any): void {
+  afterDatasetsDraw(chart: any, args: any, options: any): void {
     const { ctx, chartArea, data } = chart;
     if (!chartArea) {
       return;
@@ -117,7 +117,7 @@ const HourlyWeather = (props: IProps) => {
     [props.weatherInfo]
   );
 
-  const data: ChartData = {
+  const data: ChartData<'line', (number | ScatterDataPoint | null)[], unknown> = {
     datasets: [
       {
         label: '溫度',
@@ -142,7 +142,7 @@ const HourlyWeather = (props: IProps) => {
     ],
   };
 
-  const options: any = {
+  const options: ChartOptions<'line'> & Partial<LineOptions>= {
     maintainAspectRatio: false,
     interaction: {
       mode: 'index',
@@ -151,7 +151,7 @@ const HourlyWeather = (props: IProps) => {
     scales: {
       y: {
         ticks: {
-          callback: (value: string | number , index: number, values: any) => (value + '°'),
+          callback: (value: string | number, index: number, values: any) => (value + '°'),
           precision: 0,
         },
         grid: {
