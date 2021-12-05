@@ -1,9 +1,12 @@
 import React, { memo, useCallback, useMemo, Fragment } from 'react';
-import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js';
+import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Title } from 'chart.js';
+import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js';  // chart.js types
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { IWeatherResp } from '../API';
 import styles from './HourlyWeather.module.scss';
+
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title);
 
 const iconLabelPlugin: any = {
   iconSize: 36,
@@ -142,7 +145,7 @@ const HourlyWeather = (props: IProps) => {
     ],
   };
 
-  const options: ChartOptions<'line'> & Partial<LineOptions>= {
+  const options: ChartOptions<'line'> & Partial<LineOptions> = {
     maintainAspectRatio: false,
     interaction: {
       mode: 'index',

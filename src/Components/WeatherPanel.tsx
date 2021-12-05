@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 
 import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
@@ -53,7 +53,7 @@ const WeatherPanel = () => {
   const [currentWeather, setCurrentWeather] = useState<ICurrentWeather | null>(null);
   const [hourlyWeather, setHourlyWeather] = useState<IWeatherResp['hourly']>([]);
 
-  const getWeather = useCallback(async () => {
+  const getWeather = async () => {
     if (!isOnline) {
       toast.error('沒有網路連線，請連上網路後再試');
       return;
@@ -105,7 +105,7 @@ const WeatherPanel = () => {
       throw err;
     }
     setCity(geocoding[0].local_names.ascii);
-  }, [isOnline]);
+  };
 
   useEffect(() => {
     getWeather();
