@@ -45,6 +45,7 @@ const getGeoLocation = (): Promise<ILocation> => {
 
 const WeatherPanel = () => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [lastVisibleTime, setLastVisibleTime] = useState<Date>(new Date());
   const [fetchTime, setFetchTime] = useState<Date>(new Date());
   const [fetchTimeStatus, setFetchTimeStatus] = useState<string>('尚未');
 
@@ -111,20 +112,20 @@ const WeatherPanel = () => {
     getWeather();
   }, []);
 
+  // check update status every 15 seconds
   useEffect(() => {
-    // check update status every 10 seconds
-    const updateTimer = setInterval(() => {
+    const intervalId = setInterval(() => {
       let status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
       setFetchTimeStatus(status);
       if (isOnline && (differenceInMinutes(new Date(), fetchTime) >= 60)) {
         // update weather older than 1 hour
         getWeather();
       }
-    }, 1000 * 10);
+    }, 1000 * 15);
     return () => {
-      clearInterval(updateTimer);
+      clearInterval(intervalId);
     };
-  }, [fetchTime, isOnline]);
+  }, [isOnline, fetchTime]);
 
   useEffect(() => {
     const offlineListener = () => {
@@ -136,11 +137,23 @@ const WeatherPanel = () => {
       // toast.success('已連上網路');
     };
 
+    // update weather when last open time is more than 1 hour ago
+    const visibilityListener = () => {
+      if (document.visibilityState === 'visible') {
+        if (differenceInMinutes(new Date(), lastVisibleTime) >= 60) {
+          getWeather();
+        }
+        setLastVisibleTime(new Date());
+      }
+    }
+
     window.addEventListener('offline', offlineListener);
     window.addEventListener('online', onlineListener);
+    window.addEventListener('visibilitychange', visibilityListener);
     return () => {
       window.removeEventListener('offline', offlineListener);
-      window.removeEventListener('online', onlineListener)
+      window.removeEventListener('online', onlineListener);
+      window.removeEventListener('visibilitychange', visibilityListener);
     }
   }, [])
 
