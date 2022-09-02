@@ -1,5 +1,12 @@
 @import '../common.scss';
 
+@mixin withMargin {
+  max-height: inherit;
+  width: 80vw;
+  height: 60vh;
+  margin: 20vh 10vw;
+}
+
 .hourlyWeatherModal {
   @include modalBase();
   bottom: 0;
@@ -8,10 +15,8 @@
   height: 90vh;
   max-height: 360px;
   margin: 5vh 10vw;
-  @include response(pad) {
-    max-height: inherit;
-    width: 80vw;
-    height: 60vh;
-    margin: 20vh 10vw;
+
+  @media (orientation: landscape) and (min-height: 420px) {
+    @include withMargin();
   }
 }

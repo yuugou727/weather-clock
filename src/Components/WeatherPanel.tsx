@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 
 import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
@@ -54,7 +54,7 @@ const WeatherPanel = () => {
   const [currentWeather, setCurrentWeather] = useState<ICurrentWeather | null>(null);
   const [hourlyWeather, setHourlyWeather] = useState<IWeatherResp['hourly']>([]);
 
-  const getWeather = async () => {
+  const getWeather = useCallback(async () => {
     if (!isOnline) {
       toast.error('沒有網路連線，請連上網路後再試');
       return;
@@ -105,8 +105,8 @@ const WeatherPanel = () => {
     } catch (err) {
       throw err;
     }
-    setCity(geocoding[0].local_names.ascii);
-  };
+    setCity(geocoding[0].local_names.zh);
+  }, [isOnline, isQuerying]);
 
   useEffect(() => {
     getWeather();
@@ -127,6 +127,23 @@ const WeatherPanel = () => {
     };
   }, [isOnline, fetchTime]);
 
+  // get weather when visible
+  useEffect(() => {
+    // update weather when last open time is more than 1 hour ago
+    const visibilityListener = () => {
+      if (document.visibilityState === 'visible') {
+        if (differenceInMinutes(new Date(), lastVisibleTime) >= 60) {
+          getWeather();
+        }
+        setLastVisibleTime(new Date());
+      }
+    };
+    window.addEventListener('visibilitychange', visibilityListener);
+    return () => {
+      window.removeEventListener('visibilitychange', visibilityListener);
+    };
+  }, [lastVisibleTime]);
+
   useEffect(() => {
     const offlineListener = () => {
       setIsOnline(false);
@@ -137,25 +154,13 @@ const WeatherPanel = () => {
       // toast.success('已連上網路');
     };
 
-    // update weather when last open time is more than 1 hour ago
-    const visibilityListener = () => {
-      if (document.visibilityState === 'visible') {
-        if (differenceInMinutes(new Date(), lastVisibleTime) >= 60) {
-          getWeather();
-        }
-        setLastVisibleTime(new Date());
-      }
-    }
-
     window.addEventListener('offline', offlineListener);
     window.addEventListener('online', onlineListener);
-    window.addEventListener('visibilitychange', visibilityListener);
     return () => {
       window.removeEventListener('offline', offlineListener);
       window.removeEventListener('online', onlineListener);
-      window.removeEventListener('visibilitychange', visibilityListener);
-    }
-  }, [])
+    };
+  }, []);
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);
@@ -170,6 +175,7 @@ const WeatherPanel = () => {
           show={showHourlyWeather}
           closeHourlyWeather={() => setShowHourlyWeather(false)}
           weatherInfo={hourlyWeather}
+          city={city}
         />
       </Suspense>
       <ActionButtons

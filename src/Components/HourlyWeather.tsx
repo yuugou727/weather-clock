@@ -1,12 +1,12 @@
 import React, { memo, useCallback, useMemo, Fragment } from 'react';
-import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Title } from 'chart.js';
+import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend } from 'chart.js';
 import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js';  // chart.js types
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { IWeatherResp } from '../API';
 import styles from './HourlyWeather.module.scss';
 
-ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title);
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend );
 
 const iconLabelPlugin: any = {
   iconSize: 36,
@@ -75,11 +75,12 @@ interface IProps {
   show: boolean;
   closeHourlyWeather: () => void;
   weatherInfo: IWeatherResp['hourly'];
+  city: String;
 }
 
 const HourlyWeather = (props: IProps) => {
   const createCtxGradient = useCallback(
-    (context) => {
+    (context: any) => {
       const chart = context.chart;
       const { ctx, chartArea } = chart;
       if (!chartArea) {
@@ -114,6 +115,7 @@ const HourlyWeather = (props: IProps) => {
       time: format((hr.dt * 1000), 'E haaa'),
       temp: Math.round(hr.temp * 10) / 10,
       feltTemp: Math.round(hr.feels_like * 10) / 10,
+      humidity: hr.humidity,
       icon: hr.weather[0].icon,
       desc: hr.weather[0].description
     })),
@@ -123,7 +125,7 @@ const HourlyWeather = (props: IProps) => {
   const data: ChartData<'line', (number | ScatterDataPoint | null)[], unknown> = {
     datasets: [
       {
-        label: '溫度',
+        label: '氣溫',
         data: weatherData,
         parsing: {
           xAxisKey: 'time',
@@ -133,7 +135,7 @@ const HourlyWeather = (props: IProps) => {
         borderColor: '#bbb',
       },
       {
-        label: '體感溫度',
+        label: '體感',
         data: weatherData,
         parsing: {
           xAxisKey: 'time',
@@ -174,6 +176,10 @@ const HourlyWeather = (props: IProps) => {
     tension: 0.5,
     borderWidth: 6,
     plugins: {
+      title: {
+        display: true,
+        text: props.city + ' 未來24小時天氣預測',
+      },
       legend: {
         onClick: (event: any) => event.native.preventDefault(),
         labels: {

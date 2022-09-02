@@ -29,13 +29,13 @@ export const CurrentWeather = memo((props: IProps) => {
   return (
     <Fragment>
       <div className={styles.weatherInfo}>
+        <p className={styles.location}>{city}</p>
         <img
           className={styles.weatherIcon}
           alt={weather?.desc}
           src={weather?.icon ? `https://openweathermap.org/img/wn/${weather.icon}@2x.png` : ''}
           crossOrigin="anonymous"
         />
-        <p className={styles.location}>{city}</p>
         <p className={styles.weather}>{weather?.desc}</p>
       </div>
       <div className={styles.weatherDetails}>
