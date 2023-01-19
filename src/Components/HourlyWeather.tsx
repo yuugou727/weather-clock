@@ -166,8 +166,7 @@ const HourlyWeather = (props: IProps) => {
       x: {
         grid: {
           display: false,
-          drawBorder: false,
-        }
+        },
       }
     },
     layout: {

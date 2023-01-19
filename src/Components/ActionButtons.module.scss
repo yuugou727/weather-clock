@@ -26,11 +26,22 @@
     background-color: #bbb;
     outline: none;
     border: none;
-    padding: 8px;
+    display: flex;
+    img {
+      margin: auto;
+    }
   }
+
   .colorPickerBtn {
     border: 2px solid #ddd;
     background-color: var(--bgc);
+  }
+
+  .hourlyWeatherIcon {
+    @include response(pad) {
+      width: 28px;
+      height: 28px;
+    }
   }
 
   .refreshIcon {

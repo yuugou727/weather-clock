@@ -6,44 +6,46 @@ Demo: https://ronnie-weather-clock.web.app
 
 打包成PWA，支援 Android Chrome 或 iOS Safari「加到主畫面」選項，方便下載成 App 單獨使用。
 
-# 開發
+# 架構
 
-[Create React App](https://github.com/facebookincubator/create-react-app)
-建置。尚未 `yarn eject` ，更多開發說明可參考[原README](README-react.md)。
+前後端分離架構：
+- 前端 PWA 使用 [Create React App](https://github.com/facebookincubator/create-react-app)
+建置。尚未 `yarn eject` ，更多開發說明可參考[原README](README-react.md)
+- 後端 API 為 Firebase Functions (Node.js)，proxy 第三方服務API
 
-## 第三方
+### 平台
+- [Firebase Hosting](https://firebase.google.com/docs/hosting) 託管靜態前端檔案
+- [Firebase Functions](https://firebase.google.com/docs/functions) 部署 serverless functions
 
-氣溫變化圖表使用 [Chart.js](https://github.com/chartjs/Chart.js) 與 [Wrapper for React](https://github.com/reactchartjs/react-chartjs-2)，自製 Chart.js plugin 用以在折線圖上繪製天氣icon。
-
-使用 Firebase Hosting 部署與 Firebase Functions 實作 proxy server 介接以下 API:
+### 第三方服務
 * 定位服務：[Google Geolocation API](https://developers.google.com/maps/documentation/geolocation/intro)
-* 天氣資訊、Geocoding：[OpenWeatherMap API](https://openweathermap.org/api)
+* 天氣資訊、地名查詢：[OpenWeatherMap API](https://openweathermap.org/api)
 
-## 本機開發
+### 圖表套件
+使用 [Chart.js](https://github.com/chartjs/Chart.js) 與 [Wrapper for React](https://github.com/reactchartjs/react-chartjs-2) 產生氣溫變化圖表，自製 Chart.js plugin 用以在折線圖上繪製天氣icon。
 
-**需求**：
-- 新建 Firebase 專案
-- Google Cloud Platform Geolocation API 
-- Open Weather Map API 的金鑰憑證。
+# 本機開發
 
-### React app 設定
-於根目錄新建檔案 `.env.local` ，並寫入一行 `REACT_APP_GCP_KEY` 帶入 Google Cloud Platform 的金鑰：
-```.env.local
-REACT_APP_GCP_KEY=你的GoogleCloud金鑰
+## **第三方服務需求**：
+- 需連結或新建 Firebase 專案，使用 functions（與 Hosting，選用）服務，參考 [Firebase 指南](https://firebase.google.com/docs/functions/get-started)
+- 於 [Google Cloud 地圖平台](https://console.cloud.google.com/google/maps-apis/credentials)新增專案，並建立一組能呼叫 Geolocation API 的憑證金鑰
+- 註冊 Open Weather Map 免費服務，建立一組 [API key](https://home.openweathermap.org/api_keys)
+
+## 前端本機環境設定
+於根目錄新建一個環境變數檔案 `.env.local` ，並寫入 Google Geolocation API 金鑰與 Firebase 專案ID：
+
+```env .env.local
+REACT_APP_GEOLOCATION_API_KEY=Geolocation_API_Key
+PROJECT_ID=Firebase_Project_ID
 ```
 
-### Firebase Functions 設定
-需連結或新建 Firebase 專案，並使用 functions（與 hosting，選用）服務，參考 [Firebase 指南](https://firebase.google.com/docs/functions/get-started)
+> Project ID 可在 Firebase web console 查看，也能從本機運行或部署 functions 時的終端機訊息中查找
 
-> Firebase 專案的 `PROJECT_ID`、Hosting 網域可在 Firebase web console 查看，也會出現在模擬、部署 functions 時的終端機訊息中
-
-- 置換 `.env` 檔案中 `REACT_APP_API` 路徑的 PROJECT_ID
-    ```.env
-    REACT_APP_API=http://localhost:5000/PROJECT_ID/us-central1/
-    ```
-- 於 functions 資料夾下指令，將金鑰設定至環境變數：
+## Firebase Functions 環境設定
+    
+- 於 functions 資料夾下指令，將 Open Weather Map 的 API Key 設定至環境變數：
     ```sh
-    firebase functions:config:set openweather.key="你的OpenWeatherMap金鑰"
+    firebase functions:config:set openweather.key="Weather_API_Key"
     ```
 - 下指令產生`.runtimeconfig.json` 檔案用以本機模擬變數使用：
     ```sh
@@ -51,12 +53,16 @@ REACT_APP_GCP_KEY=你的GoogleCloud金鑰
     ```
     > 參考 [Run functions locally](https://firebase.google.com/docs/functions/local-emulator) 與 [為 function 設定環境變數](https://firebase.google.com/docs/functions/config-env)
 
+## 指令
 
 本機開發 web server：
 ```sh
+# Run React at http://localhost:3000
 npm run start
 ```
-於 functions 目錄下執行，本機模擬 functions：
+於 `functions` 目錄下運行本機 Firebase Functions：
 ```sh
+cd functions
 npm run serve
+# http://localhost:5000/project-id/region/functions
 ```

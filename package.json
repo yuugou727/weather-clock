@@ -1,23 +1,23 @@
 {
   "name": "weather-clock",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "dependencies": {
-    "@types/jest": "^29.0.0",
-    "@types/node": "^18.7.14",
-    "@types/react": "^18.0.18",
-    "@types/react-dom": "^18.0.6",
-    "chart.js": "^3.9.1",
-    "date-fns": "^2.29.2",
-    "node-sass": "^7.0.1",
+    "@types/jest": "^29.2.6",
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "chart.js": "^4.2.0",
+    "date-fns": "^2.29.3",
+    "node-sass": "^8.0.0",
     "promise-polyfill": "8.2.3",
     "react": "^18.2.0",
-    "react-chartjs-2": "^4.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
-    "react-toastify": "^9.0.8",
-    "typescript": "^4.8.2",
-    "web-vitals": "^3.0.1",
+    "react-toastify": "^9.1.1",
+    "typescript": "^4.9.4",
+    "web-vitals": "^3.1.1",
     "whatwg-fetch": "^3.6.2",
     "workbox-background-sync": "^6.5.4",
     "workbox-broadcast-update": "^6.5.4",
@@ -39,11 +39,6 @@
     "eject": "react-scripts eject",
     "deploy": "firebase deploy --only hosting"
   },
-  "devDependencies": {
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
-    "enzyme": "^3.11.0",
-    "enzyme-to-json": "^3.6.2"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -54,11 +49,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ]
-  },
-  "jest": {
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
     ]
   }
 }

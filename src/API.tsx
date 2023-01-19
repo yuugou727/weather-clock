@@ -1,9 +1,12 @@
 // Envs: GCP Weather API and Key
 const {
   REACT_APP_GEOLOCATION_API,
-  REACT_APP_GCP_KEY,
-  REACT_APP_API,
+  REACT_APP_GEOLOCATION_API_KEY,
+  REACT_APP_LOCAL_FUNCTIONS,
 } = process.env;
+
+const FUNCTIONS_ROOT = process.env.NODE_ENV === 'production' ?
+  '' : REACT_APP_LOCAL_FUNCTIONS;
 
 export interface ILocation {
   lat: number;
@@ -31,7 +34,7 @@ export const geolocationAPI = async (): Promise<ILocation> => {
     throw new Error('Geolocation API path not defined');
   }
   const res: Response = await fetch(
-    api + '?key=' + REACT_APP_GCP_KEY,
+    api + '?key=' + REACT_APP_GEOLOCATION_API_KEY,
     { method: 'POST' }
   );
   if (!res.ok) {
@@ -90,7 +93,7 @@ export type IWeatherResp = {
 };
 
 export const weatherAPI = async (lat: number, lng: number): Promise<IWeatherResp> => {
-  const api = `${REACT_APP_API}/weather?lat=${lat}&lng=${lng}`;
+  const api = `${FUNCTIONS_ROOT}/weather?lat=${lat}&lng=${lng}`;
   const weatherResp: Response = await fetch(api)
   if (!weatherResp.ok) {
     throw new Error(weatherResp.statusText);
@@ -113,7 +116,7 @@ export interface IGeocoding {
 }
 
 export const reverseGeocodingAPI = async (lat: number, lng: number): Promise<IGeocoding[]> => {
-  const api = `${REACT_APP_API}/reverseGeocoding?lat=${lat}&lng=${lng}`;
+  const api = `${FUNCTIONS_ROOT}/reverseGeocoding?lat=${lat}&lng=${lng}`;
   const geocodingResp: Response = await fetch(api);
   if (!geocodingResp.ok) {
     throw new Error(geocodingResp.statusText);

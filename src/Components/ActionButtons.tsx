@@ -37,6 +37,7 @@ const ActionButtons = (props: IProps) => {
       >
         <img
           src={ChartIcon}
+          className={styles.hourlyWeatherIcon}
           alt="hourly weather"
         />
       </button>
