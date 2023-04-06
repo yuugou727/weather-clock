@@ -4,17 +4,12 @@ import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { IWeatherResp } from '../API';
+import { tempHsl } from '../common';
 import styles from './HourlyWeather.module.scss';
 import CustomOWMIconLabelPlugin from './CustomOWMIconLabelPlugin';
 
-ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend );
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend);
 
-const tempHSL = (temp = 24): string => {
-  const hue = temp < 0 ? 220 :
-    temp > 38 ? 0 :
-      220 - Math.round((temp / 38) * 220);
-  return `hsl(${hue},70%,60%)`;
-};
 
 interface IProps {
   show: boolean;
@@ -35,7 +30,7 @@ const HourlyWeather = (props: IProps) => {
       const temps = props.weatherInfo.map(hr => Math.round(hr.feels_like * 10) / 10);
       const maxTemp = temps.length > 0 ? Math.max.apply(null, temps) : 32;
       const minTemp = temps.length > 0 ? Math.min.apply(null, temps) : 16;
-      const midTemp = (maxTemp + minTemp) / 2;
+      const tempDiff = maxTemp - minTemp;
 
       let width, height, gradient;
       const chartWidth = chartArea.right - chartArea.left;
@@ -46,9 +41,9 @@ const HourlyWeather = (props: IProps) => {
         width = chartWidth;
         height = chartHeight;
         gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-        gradient.addColorStop(0, tempHSL(minTemp));
-        gradient.addColorStop(0.5, tempHSL(midTemp));
-        gradient.addColorStop(1, tempHSL(maxTemp));
+        gradient.addColorStop(0, tempHsl(minTemp));
+        gradient.addColorStop(0.5, tempHsl(minTemp + tempDiff * 0.5));
+        gradient.addColorStop(1, tempHsl(maxTemp));
       }
       return gradient;
     },

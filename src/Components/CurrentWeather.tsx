@@ -1,11 +1,6 @@
 import React, { memo, Fragment } from 'react';
+import { tempHsl } from '../common';
 import styles from './CurrentWeather.module.scss'
-
-const computeTempHue = (temp: number = 23): number => {
-  return temp < 0 ? 220 :
-    temp > 38 ? 0 :
-      220 - Math.round((temp / 38) * 220);
-}
 
 export interface ICurrentWeather {
   humidity: number;
@@ -23,8 +18,8 @@ interface IProps {
 
 export const CurrentWeather = memo((props: IProps) => {
   const { weather, city, fetchTimeStatus } = props;
-  const tempColor = `hsl(${computeTempHue(weather?.temp)},70%,60%)`;
-  const feltTempColor = `hsl(${computeTempHue(weather?.feltTemp)},70%,60%)`;
+  const tempColor = tempHsl(weather?.temp);
+  const feltTempColor = tempHsl(weather?.feltTemp);
   const humidityColor = `hsl(200, 100%, ${100 - (weather?.humidity || 60) / 2}%)`;
   return (
     <Fragment>

@@ -16,11 +16,11 @@ const App = () => {
         <p>
           <span className="version">
             v{REACT_APP_VERSION}
-          </span> Hosted by <a
+          </span> <a
             href="https://yuugou727.github.io"
             target="_blank"
             rel="noopener noreferrer"
-          >Ronnie Chang</a>. Weather info by <a
+          >Ronnie Chang</a> © 2023. Weather info by <a
             href="https://openweathermap.org/"
             target="_blank"
             rel="noopener noreferrer"
