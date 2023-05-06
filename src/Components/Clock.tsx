@@ -25,7 +25,7 @@ const Clock = () => {
       </div>
       <div className={styles.right}>
         <span className={styles.ampm}>{format(date, 'a')}</span>
-        <span className={styles.seconds}>{format(date, 'ss')}</span>
+        <span className={styles.seconds} role="seconds">{format(date, 'ss')}</span>
       </div>
     </div>
   )
