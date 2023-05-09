@@ -6,11 +6,15 @@ Demo: https://ronnie-weather-clock.web.app
 
 打包成PWA，支援 Android Chrome 或 iOS Safari「加到主畫面」選項，方便下載成 App 單獨使用。
 
+# 開發環境
+- Node.js v18.16
+- npm v9.5.1
+
 # 架構
 
 前後端分離架構：
-- 前端 PWA 使用 [Create React App](https://github.com/facebookincubator/create-react-app)
-建置。尚未 `yarn eject` ，更多開發說明可參考[原README](README-react.md)
+- 前端 PWA 最初使用 [Create React App](https://github.com/facebookincubator/create-react-app)
+建置，後已轉換使用 [Vite](https://vitejs.dev/)、[vitest](https://vitest.dev/) 與 [Vite PWA](https://vite-pwa-org.netlify.app/)。
 - 後端 API 為 Firebase Functions (Node.js)，proxy 第三方服務API
 
 ### 平台
@@ -35,7 +39,7 @@ Demo: https://ronnie-weather-clock.web.app
 於根目錄新建一個環境變數檔案 `.env.local` ，並寫入 Google Geolocation API 金鑰與 Firebase 專案ID：
 
 ```env .env.local
-REACT_APP_GEOLOCATION_API_KEY=Geolocation_API_Key
+VITE_VAR_GEOLOCATION_API_KEY=Geolocation_API_Key
 PROJECT_ID=Firebase_Project_ID
 ```
 
@@ -57,7 +61,7 @@ PROJECT_ID=Firebase_Project_ID
 
 本機開發 web server：
 ```sh
-# Run React at http://localhost:3000
+# Run Vite at http://localhost:5173
 npm run start
 ```
 於 `functions` 目錄下運行本機 Firebase Functions：

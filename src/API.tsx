@@ -1,12 +1,12 @@
 // Envs: GCP Weather API and Key
 const {
-  REACT_APP_GEOLOCATION_API,
-  REACT_APP_GEOLOCATION_API_KEY,
-  REACT_APP_LOCAL_FUNCTIONS,
-} = process.env;
+  VITE_VAR_GEOLOCATION_API,
+  VITE_VAR_GEOLOCATION_API_KEY,
+  VITE_VAR_LOCAL_FUNCTIONS,
+} = import.meta.env;
 
-const FUNCTIONS_ROOT = process.env.NODE_ENV === 'production' ?
-  '' : REACT_APP_LOCAL_FUNCTIONS;
+const FUNCTIONS_ROOT = import.meta.env.PROD ?
+  '' : VITE_VAR_LOCAL_FUNCTIONS;
 
 export interface ILocation {
   lat: number;
@@ -29,12 +29,12 @@ type IGeoLocation = {
 };
 
 export const geolocationAPI = async (): Promise<ILocation> => {
-  const api = REACT_APP_GEOLOCATION_API;
+  const api = VITE_VAR_GEOLOCATION_API;
   if (!api) {
     throw new Error('Geolocation API path not defined');
   }
   const res: Response = await fetch(
-    api + '?key=' + REACT_APP_GEOLOCATION_API_KEY,
+    api + '?key=' + VITE_VAR_GEOLOCATION_API_KEY,
     { method: 'POST' }
   );
   if (!res.ok) {

@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Clock from './Components/Clock';
 import WeatherPanel from './Components/WeatherPanel';
 
-const { REACT_APP_VERSION } = process.env;
+const { VITE_VAR_VERSION } = import.meta.env;
 const App = () => {
   return (
     <div className="App">
@@ -15,7 +15,7 @@ const App = () => {
       <footer>
         <p>
           <span className="version">
-            v{REACT_APP_VERSION}
+            v{VITE_VAR_VERSION}
           </span> <a
             href="https://yuugou727.github.io"
             target="_blank"

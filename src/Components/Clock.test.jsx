@@ -1,3 +1,4 @@
+import { it, expect } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Clock from './Clock';

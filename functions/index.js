@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const PROJECT_ID = process.env.GCLOUD_PROJECT;
 const origins = process.env.NODE_ENV !== 'production'
-  ? ['http://localhost:3000']  // react local dev
+  ? ['http://localhost:5173']  // Vite local dev server
   : [
     `https://${PROJECT_ID}.web.app`,
     `https://${PROJECT_ID}.firebaseapp.com`,
