@@ -1,11 +1,13 @@
-{
+import { ManifestOptions } from 'vite-plugin-pwa';
+
+export const manifestOption: Partial<ManifestOptions> = {
   "name": "台灣天氣時鐘",
   "short_name": "TW天氣時鐘",
   "icons": [
     {
       "src": "icons8-clock-192.png",
       "type": "image/png",
-      "sizes": "192x192 128x128 64x64 32x32 24x24 16x16"
+      "sizes": "192x192"
     },
     {
       "src": "icons8-clock-512.png",
@@ -20,4 +22,4 @@
   "description": "簡易的時鐘網頁附加台灣天氣資訊，舊手機變身實用桌鐘",
   "dir": "ltr",
   "lang": "zh-TW"
-}
+};
