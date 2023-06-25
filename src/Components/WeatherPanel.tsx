@@ -105,7 +105,10 @@ const WeatherPanel = () => {
     } catch (err) {
       throw err;
     }
-    setCity(geocoding[0].local_names.zh);
+
+    const stateName = geocoding[0].state;
+    const cityName = geocoding[0].local_names.zh ?? geocoding[0].name;
+    setCity(`${cityName}${ stateName ? ', ' + stateName : '' }`);
   }, [isOnline, isQuerying]);
 
   useEffect(() => {

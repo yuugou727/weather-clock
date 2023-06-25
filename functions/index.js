@@ -13,7 +13,7 @@ const qs = require('qs');
 // Open Weather
 const weatherAPI = 'https://api.openweathermap.org/data/2.5/onecall';
 const reverseGeocodingAPI = 'http://api.openweathermap.org/geo/1.0/reverse';
-const OWMkey = functions.config().openweather.key;
+const OwmKey = functions.config().openweather.key;
 
 exports.weather = functions
   .region('asia-east1')
@@ -24,9 +24,10 @@ exports.weather = functions
         const queryString = qs.stringify({
           lat: lat,
           lon: lng,
-          appid: OWMkey,
+          appid: OwmKey,
           exclude: 'minutely,daily,alerts',
-          units: 'metric', lang: 'zh_tw'
+          units: 'metric',
+          lang: 'zh_tw'
         });
         fetch(weatherAPI + '?' + queryString)
           .then(response => {
@@ -56,7 +57,7 @@ exports.reverseGeocoding = functions
         const queryString = qs.stringify({
           lat: lat,
           lon: lng,
-          appid: OWMkey,
+          appid: OwmKey,
           limit: 1,
         });
         fetch(reverseGeocodingAPI + '?' + queryString)
