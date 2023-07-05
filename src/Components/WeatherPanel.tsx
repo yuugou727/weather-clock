@@ -44,8 +44,7 @@ const getGeoLocation = (): Promise<ILocation> => {
 };
 
 const WeatherPanel = () => {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [lastVisibleTime, setLastVisibleTime] = useState<Date>(new Date());
+  const [isVisible, setIsVisible] = useState<boolean>(document.visibilityState === 'visible');
   const [fetchTime, setFetchTime] = useState<Date>(new Date());
   const [fetchTimeStatus, setFetchTimeStatus] = useState<string>('尚未');
 
@@ -55,7 +54,7 @@ const WeatherPanel = () => {
   const [hourlyWeather, setHourlyWeather] = useState<IWeatherResp['hourly']>([]);
 
   const getWeather = useCallback(async () => {
-    if (!isOnline) {
+    if (!navigator.onLine) {
       toast.error('沒有網路連線，請連上網路後再試');
       return;
     }
@@ -108,62 +107,49 @@ const WeatherPanel = () => {
 
     const stateName = geocoding[0].state;
     const cityName = geocoding[0].local_names.zh ?? geocoding[0].name;
-    setCity(`${cityName}${ stateName ? ', ' + stateName : '' }`);
-  }, [isOnline, isQuerying]);
+    setCity(`${cityName}${stateName ? ', ' + stateName : ''}`);
+  }, [isQuerying]);
 
   useEffect(() => {
     getWeather();
+
+    // init window listener
+    const visibilitychangeListener = () => {
+      if (document.visibilityState === "visible") {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('visibilitychange', visibilitychangeListener);
+    return () => {
+      window.removeEventListener('visibilitychange', visibilitychangeListener);
+    };
   }, []);
 
   // check update status every 15 seconds
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      let status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
+    let intervalId: NodeJS.Timer | undefined;
+    const updateStatus = () => {
+      const status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
       setFetchTimeStatus(status);
-      if (isOnline && (differenceInMinutes(new Date(), fetchTime) >= 60)) {
+      if (navigator.onLine && (differenceInMinutes(new Date(), fetchTime) >= 60)) {
         // update weather older than 1 hour
         getWeather();
       }
-    }, 1000 * 15);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [isOnline, fetchTime]);
-
-  // get weather when visible
-  useEffect(() => {
-    // update weather when last open time is more than 1 hour ago
-    const visibilityListener = () => {
-      if (document.visibilityState === 'visible') {
-        if (differenceInMinutes(new Date(), lastVisibleTime) >= 60) {
-          getWeather();
-        }
-        setLastVisibleTime(new Date());
-      }
-    };
-    window.addEventListener('visibilitychange', visibilityListener);
-    return () => {
-      window.removeEventListener('visibilitychange', visibilityListener);
-    };
-  }, [lastVisibleTime]);
-
-  useEffect(() => {
-    const offlineListener = () => {
-      setIsOnline(false);
-      // toast.warn('沒有網路連線');
-    };
-    const onlineListener = () => {
-      setIsOnline(true);
-      // toast.success('已連上網路');
     };
 
-    window.addEventListener('offline', offlineListener);
-    window.addEventListener('online', onlineListener);
+    if (isVisible) {
+      updateStatus();
+      intervalId = setInterval(updateStatus, 1000 * 15);
+    }
     return () => {
-      window.removeEventListener('offline', offlineListener);
-      window.removeEventListener('online', onlineListener);
+      console.debug('clearInterval update');
+      intervalId && clearInterval(intervalId);
+      intervalId = undefined;
     };
-  }, []);
+  }, [isVisible, fetchTime]);
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHourlyWeather, setShowHourlyWeather] = useState(false);

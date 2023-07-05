@@ -1,6 +1,6 @@
 {
   "name": "weather-clock",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "private": true,
   "dependencies": {
     "@types/node": "^18.11.18",
