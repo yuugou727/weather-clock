@@ -37,12 +37,15 @@ exports.weather = functions
             return response.json();
           })
           .then(data => {
+            functions.logger.debug('[weather] API success');
             res.status(200).send(data);
           })
           .catch(err => {
+            functions.logger.error('[weather]', err);
             res.status(500).send({ message: err.message });
           })
       } else {
+        functions.logger.warn('[weather] invalid req:', req);
         return res.sendStatus(500);
       }
     });
@@ -68,12 +71,15 @@ exports.reverseGeocoding = functions
             return response.json();
           })
           .then(data => {
+            functions.logger.debug('[reverseGeocoding] API success');
             res.status(200).send(data);
           })
           .catch(err => {
+            functions.logger.error('[reverseGeocoding]', err);
             res.status(500).send({ message: err.message });
           })
       } else {
+        functions.logger.warn('[reverseGeocoding] invalid req:', req);
         return res.sendStatus(500);
       }
     });
