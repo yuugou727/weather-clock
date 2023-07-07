@@ -4,11 +4,13 @@ import { ChartData, ScatterDataPoint, LineOptions, ChartOptions } from 'chart.js
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import { IWeatherResp } from '../API';
-import { tempHsl } from '../common';
+import { hotTemp, tempHsl } from '../common';
 import styles from './HourlyWeather.module.scss';
 import CustomOWMIconLabelPlugin from './CustomOWMIconLabelPlugin';
+import annotationPlugin from 'chartjs-plugin-annotation';
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend);
+ChartJS.register(annotationPlugin);
 
 
 interface IProps {
@@ -19,6 +21,27 @@ interface IProps {
 }
 
 const HourlyWeather = (props: IProps) => {
+  const weatherData: any[] = useMemo(() => props.weatherInfo
+    .map((hr) => ({
+      time: format((hr.dt * 1000), 'EEE haaa'),
+      temp: Math.round(hr.temp * 10) / 10,
+      feltTemp: Math.round(hr.feels_like * 10) / 10,
+      humidity: hr.humidity,
+      icon: hr.weather[0].icon,
+      desc: hr.weather[0].description
+    })),
+    [props.weatherInfo]
+  );
+
+  const maxFeltTemp = useMemo(() =>
+    Math.max.apply(null, weatherData.map(hr => hr.feltTemp)),
+    [weatherData]
+  );
+  const minFeltTemp = useMemo(() =>
+    Math.min.apply(null, weatherData.map(hr => hr.feltTemp)),
+    [weatherData]
+  );
+
   const createCtxGradient = useCallback(
     (context: any) => {
       const chart = context.chart;
@@ -27,10 +50,7 @@ const HourlyWeather = (props: IProps) => {
         // This case happens on initial chart load
         return null;
       }
-      const temps = props.weatherInfo.map(hr => Math.round(hr.feels_like * 10) / 10);
-      const maxTemp = temps.length > 0 ? Math.max.apply(null, temps) : 32;
-      const minTemp = temps.length > 0 ? Math.min.apply(null, temps) : 16;
-      const tempDiff = maxTemp - minTemp;
+      const tempDiff = maxFeltTemp - minFeltTemp;
 
       let width, height, gradient;
       const chartWidth = chartArea.right - chartArea.left;
@@ -41,25 +61,13 @@ const HourlyWeather = (props: IProps) => {
         width = chartWidth;
         height = chartHeight;
         gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-        gradient.addColorStop(0, tempHsl(minTemp));
-        gradient.addColorStop(0.5, tempHsl(minTemp + tempDiff * 0.5));
-        gradient.addColorStop(1, tempHsl(maxTemp));
+        gradient.addColorStop(0, tempHsl(minFeltTemp));
+        gradient.addColorStop(0.5, tempHsl(minFeltTemp + tempDiff * 0.5));
+        gradient.addColorStop(1, tempHsl(maxFeltTemp));
       }
       return gradient;
     },
-    [props.weatherInfo],
-  );
-
-  const weatherData: any[] = useMemo(() => props.weatherInfo
-    .map((hr) => ({
-      time: format((hr.dt * 1000), 'E haaa'),
-      temp: Math.round(hr.temp * 10) / 10,
-      feltTemp: Math.round(hr.feels_like * 10) / 10,
-      humidity: hr.humidity,
-      icon: hr.weather[0].icon,
-      desc: hr.weather[0].description
-    })),
-    [props.weatherInfo]
+    [maxFeltTemp, minFeltTemp],
   );
 
   const data: ChartData<'line', (number | ScatterDataPoint | null)[], unknown> = useMemo(() => ({
@@ -139,6 +147,29 @@ const HourlyWeather = (props: IProps) => {
             return label;
           }
         }
+      },
+      annotation: {
+        annotations: {
+          highTempWarn: {
+            display: maxFeltTemp >= hotTemp,
+            type: 'box',
+            xMin: 0,
+            xMax: 24,
+            yMin: hotTemp,
+            yMax: Math.ceil(maxFeltTemp) > hotTemp ? Math.ceil(maxFeltTemp) : hotTemp,
+            backgroundColor: 'hsla(-5, 70%, 60%, 0.25)',
+            borderWidth: 0,
+            label: {
+              content: '高溫警告',
+              display: true,
+              color: 'hsla(-5, 70%, 90%, 0.5)',
+              xAdjust: -16,
+              font: {
+                size: 24,
+              },
+            },
+          },
+        },
       },
     }
   };

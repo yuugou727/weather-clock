@@ -171,7 +171,7 @@ const WeatherPanel = () => {
         isQuerying={isQuerying}
         onRefresh={() => getWeather()}
         onColorPickerOpen={() => setShowColorPicker(!showColorPicker)}
-        onHourlyWeatherOpen={() => setShowHourlyWeather(!showColorPicker)}
+        onHourlyWeatherOpen={() => hourlyWeather.length > 0 && setShowHourlyWeather(!showHourlyWeather)}
       />
       <CurrentWeather
         weather={currentWeather}
