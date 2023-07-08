@@ -1,6 +1,7 @@
 import React, { memo, Fragment } from 'react';
 import { tempHsl } from '../common';
 import styles from './CurrentWeather.module.scss'
+import warningIcon from '../assets/warning.png';
 
 export interface ICurrentWeather {
   humidity: number;
@@ -50,7 +51,7 @@ export const CurrentWeather = memo((props: IProps) => {
           <span
             style={{ color: tempHsl(weather?.feltTemp) }}
           > {weather?.feltTemp}°C
-          { weather && weather.feltTemp >= 36 && <img className={styles.warningIcon} src='src/assets/warning.png'/>}
+          { weather && weather.feltTemp >= 36 && <img className={styles.warningIcon} src={warningIcon} />}
           </span>
         </p>
         <p className={styles.humidity}>濕度
