@@ -1,7 +1,14 @@
 {
   "name": "weather-clock",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "vitest",
+    "deploy": "firebase deploy --only hosting"
+  },
   "dependencies": {
     "@types/node": "^18.11.18",
     "@types/react": "^18.2.14",
@@ -18,12 +25,16 @@
     "web-vitals": "^3.3.2",
     "whatwg-fetch": "^3.6.2"
   },
-  "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "test": "vitest",
-    "deploy": "firebase deploy --only hosting"
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
+    "@vitejs/plugin-react": "^4.0.2",
+    "jsdom": "^22.1.0",
+    "sass": "^1.63.6",
+    "vite": "^4.4.2",
+    "vite-plugin-pwa": "^0.16.4",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.33.0"
   },
   "browserslist": {
     "production": [
@@ -36,16 +47,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
-    "@vitejs/plugin-react": "^4.0.2",
-    "jsdom": "^22.1.0",
-    "sass": "^1.63.6",
-    "vite": "^4.4.2",
-    "vite-plugin-pwa": "^0.16.4",
-    "vite-tsconfig-paths": "^4.2.0",
-    "vitest": "^0.33.0"
   }
 }

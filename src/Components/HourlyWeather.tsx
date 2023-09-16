@@ -95,6 +95,10 @@ const HourlyWeather = (props: IProps) => {
     ],
   }), [weatherData, createCtxGradient]);
 
+  const ceilToEven = (num: number) => {
+    return num % 2 === 0 ? num : num + 1;
+  }
+
   const options: ChartOptions<'line'> & Partial<LineOptions> = {
     maintainAspectRatio: false,
     interaction: {
@@ -156,7 +160,7 @@ const HourlyWeather = (props: IProps) => {
             xMin: 0,
             xMax: 24,
             yMin: hotTemp,
-            yMax: Math.ceil(maxFeltTemp) > hotTemp ? Math.ceil(maxFeltTemp) : hotTemp,
+            yMax: Math.ceil(maxFeltTemp) > hotTemp ? ceilToEven(Math.ceil(maxFeltTemp)) : hotTemp,
             backgroundColor: 'hsla(-5, 70%, 60%, 0.25)',
             borderWidth: 0,
             label: {

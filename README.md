@@ -7,8 +7,8 @@ Demo: https://ronnie-weather-clock.web.app
 打包成PWA，支援 Android Chrome 或 iOS Safari「加到主畫面」選項，方便下載成 App 單獨使用。
 
 # 開發環境
-- Node.js v18.16
-- npm v9.5.1
+- [Bun](https://bun.sh) v1.0.2
+- [Firebase CLI](https://firebase.google.com/docs/cli?hl=zh-tw)
 
 # 架構
 
@@ -59,14 +59,31 @@ PROJECT_ID=Firebase_Project_ID
 
 ## 指令
 
+***使用 [Bun](https://bun.sh/) 取代 Node.js 與 npm，作爲下一代執行環境(runtime)與套件管理工具(package manager)***
+
+MacOS 使用 homebrew 安裝 bun
+```sh
+brew tap oven-sh/bun
+brew install bun 
+```
+
+安裝依賴套件：
+```sh
+bun install
+```
+
 本機開發 web server：
 ```sh
-# Run Vite at http://localhost:5173
-npm run start
+# Run Vite at http://localhost:3000
+bun start 
 ```
+
 於 `functions` 目錄下運行本機 Firebase Functions：
 ```sh
 cd functions
-npm run serve
+bun install
+
+# 本機 API server 
 # http://localhost:5000/project-id/region/functions
+bun serve
 ```
