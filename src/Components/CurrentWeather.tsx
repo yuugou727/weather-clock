@@ -3,7 +3,7 @@ import { tempHsl } from '../common';
 import styles from './CurrentWeather.module.scss'
 import warningIcon from '../assets/warning.png';
 
-export interface ICurrentWeather {
+export interface Weather {
   humidity: number;
   temp: number;
   feltTemp: number;
@@ -11,13 +11,13 @@ export interface ICurrentWeather {
   desc: string;
 }
 
-interface IProps {
-  weather: ICurrentWeather | null;
+interface Props {
+  weather: Weather | null;
   city: string;
   fetchTimeStatus: string;
 }
 
-export const CurrentWeather = memo((props: IProps) => {
+export const CurrentWeather = memo((props: Props) => {
   const { weather, city, fetchTimeStatus } = props;
 
   const humidityHsl = (humidity = 60): string => {

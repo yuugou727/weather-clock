@@ -7,7 +7,7 @@ Demo: https://ronnie-weather-clock.web.app
 打包成PWA，支援 Android Chrome 或 iOS Safari「加到主畫面」選項，方便下載成 App 單獨使用。
 
 # 開發環境
-- [Bun](https://bun.sh) v1.0.2
+- [Bun](https://bun.sh) v1.0.18
 - [Firebase CLI](https://firebase.google.com/docs/cli?hl=zh-tw)
 
 # 架構

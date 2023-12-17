@@ -15,12 +15,12 @@ const App = () => {
       <footer>
         <p>
           <span className="version">
-            v{VITE_VAR_VERSION}
-          </span> <a
-            href="https://yuugou727.github.io"
+            {/* v{VITE_VAR_VERSION}x */}
+          </span>Ronnie Chang © 2023 (<a
+            href="https://github.com/yuugou727/weather-clock"
             target="_blank"
             rel="noopener noreferrer"
-          >Ronnie Chang</a> © 2023. Weather info by <a
+          >Github</a>). Weather info by <a
             href="https://openweathermap.org/"
             target="_blank"
             rel="noopener noreferrer"

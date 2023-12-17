@@ -3,15 +3,16 @@ import RefreshIcon from '../assets/refresh.svg';
 import ChartIcon from '../assets/chart.svg';
 import styles from './ActionButtons.module.scss';
 
-interface IProps {
+interface Props {
   isQuerying: boolean;
   onRefresh: () => void;
   onColorPickerOpen: () => void;
   onHourlyWeatherOpen: () => void;
 }
 
-const ActionButtons = (props: IProps) => {
-  const { isQuerying, onRefresh, onColorPickerOpen, onHourlyWeatherOpen } = props;
+const ActionButtons = (props: Props) => {
+  const { isQuerying, onRefresh, onColorPickerOpen, onHourlyWeatherOpen } =
+    props;
   return (
     <div className={styles.root}>
       <button
@@ -42,11 +43,12 @@ const ActionButtons = (props: IProps) => {
         />
       </button>
     </div>
-  )
-}
+  );
+};
 
-
-export default memo(ActionButtons, (prevProps, nextProps) => 
-  prevProps.isQuerying === nextProps.isQuerying 
-  && prevProps.onRefresh === nextProps.onRefresh
+export default memo(
+  ActionButtons,
+  (prevProps, nextProps) =>
+    prevProps.isQuerying === nextProps.isQuerying &&
+    prevProps.onRefresh === nextProps.onRefresh
 );

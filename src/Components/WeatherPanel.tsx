@@ -1,31 +1,24 @@
 import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
-
 import { toast } from 'react-toastify';
 import { formatDistanceStrict, differenceInMinutes } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 
+import { Location, Geocoding, WeatherResponse } from '../api/models';
+import { geolocationAPI, weatherAPI, reverseGeocodingAPI } from '../api';
 import ColorPicker from './ColorPicker';
 import ActionButtons from './ActionButtons';
-import { CurrentWeather, ICurrentWeather } from './CurrentWeather';
+import { CurrentWeather, type Weather } from './CurrentWeather';
 const HourlyWeather = lazy(() => import('./HourlyWeather'));
-import {
-  ILocation,
-  IGeocoding,
-  IWeatherResp,
-  geolocationAPI,
-  weatherAPI,
-  reverseGeocodingAPI,
-} from '../API';
 import styles from './WeatherPanel.module.scss';
 
-const getGeoLocation = (): Promise<ILocation> => {
+const getGeoLocation = (): Promise<Location> => {
   if ('geolocation' in navigator) {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           });
         },
         (err) => {
@@ -35,7 +28,7 @@ const getGeoLocation = (): Promise<ILocation> => {
         {
           timeout: 10000,
         }
-      )
+      );
     });
   } else {
     //fallback to use Google Geolocation API
@@ -44,14 +37,18 @@ const getGeoLocation = (): Promise<ILocation> => {
 };
 
 const WeatherPanel = () => {
-  const [isVisible, setIsVisible] = useState<boolean>(document.visibilityState === 'visible');
+  const [isVisible, setIsVisible] = useState<boolean>(
+    document.visibilityState === 'visible'
+  );
   const [fetchTime, setFetchTime] = useState<Date>(new Date());
   const [fetchTimeStatus, setFetchTimeStatus] = useState<string>('尚未');
 
   const [city, setCity] = useState<string>('');
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
-  const [currentWeather, setCurrentWeather] = useState<ICurrentWeather | null>(null);
-  const [hourlyWeather, setHourlyWeather] = useState<IWeatherResp['hourly']>([]);
+  const [currentWeather, setCurrentWeather] = useState<Weather | null>(null);
+  const [hourlyWeather, setHourlyWeather] = useState<WeatherResponse['hourly']>(
+    []
+  );
 
   const getWeather = useCallback(async () => {
     if (!navigator.onLine) {
@@ -63,17 +60,17 @@ const WeatherPanel = () => {
     }
     setIsQuerying(true);
 
-    let location: ILocation;
+    let location: Location;
     try {
       location = await getGeoLocation();
     } catch (err) {
       setIsQuerying(false);
-      toast.error('[定位錯誤] ' + err)
+      toast.error('[定位錯誤] ' + err);
       throw err;
     }
 
     /** weather api */
-    let weatherResult: IWeatherResp;
+    let weatherResult: WeatherResponse;
     try {
       const { lat, lng } = location;
       weatherResult = await weatherAPI(lat, lng);
@@ -92,12 +89,12 @@ const WeatherPanel = () => {
       temp: Math.round(temp * 10) / 10,
       feltTemp: Math.round(feels_like * 10) / 10,
       icon: weather[0].icon,
-      desc: weather[0].description
+      desc: weather[0].description,
     });
     setHourlyWeather(weatherResult.hourly.slice(0, 24));
 
     /** reverse-geocoding api */
-    let geocoding: IGeocoding[];
+    let geocoding: Geocoding[];
     try {
       const { lat, lng } = location;
       geocoding = await reverseGeocodingAPI(lat, lng);
@@ -115,7 +112,7 @@ const WeatherPanel = () => {
 
     // init window listener
     const visibilitychangeListener = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === 'visible') {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -132,9 +129,14 @@ const WeatherPanel = () => {
   useEffect(() => {
     let intervalId: NodeJS.Timer | undefined;
     const updateStatus = () => {
-      const status = formatDistanceStrict(new Date(), fetchTime, { locale: zhTW }).concat('前');
+      const status = formatDistanceStrict(new Date(), fetchTime, {
+        locale: zhTW,
+      }).concat('前');
       setFetchTimeStatus(status);
-      if (navigator.onLine && (differenceInMinutes(new Date(), fetchTime) >= 60)) {
+      if (
+        navigator.onLine &&
+        differenceInMinutes(new Date(), fetchTime) >= 60
+      ) {
         // update weather older than 1 hour
         getWeather();
       }
@@ -171,7 +173,9 @@ const WeatherPanel = () => {
         isQuerying={isQuerying}
         onRefresh={() => getWeather()}
         onColorPickerOpen={() => setShowColorPicker(!showColorPicker)}
-        onHourlyWeatherOpen={() => hourlyWeather.length > 0 && setShowHourlyWeather(!showHourlyWeather)}
+        onHourlyWeatherOpen={() =>
+          hourlyWeather.length > 0 && setShowHourlyWeather(!showHourlyWeather)
+        }
       />
       <CurrentWeather
         weather={currentWeather}
@@ -180,6 +184,6 @@ const WeatherPanel = () => {
       />
     </div>
   );
-}
+};
 
-export default WeatherPanel
+export default WeatherPanel;

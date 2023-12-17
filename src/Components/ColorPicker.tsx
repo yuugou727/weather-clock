@@ -1,9 +1,9 @@
 import React, { Fragment, memo } from 'react';
-import styles from './ColorPicker.module.scss'
+import styles from './ColorPicker.module.scss';
 
 function* hueListGenerator(divided: number) {
   const interval = Math.floor(360 / divided);
-  for (let hue = 0; hue <= (360 - interval); hue += interval) {
+  for (let hue = 0; hue <= 360 - interval; hue += interval) {
     yield hue;
   }
 }
@@ -14,26 +14,23 @@ const changeTheme = (hue: number): void => {
   root.style.setProperty('--themeHue', hue.toString());
 };
 
-interface IProps {
+interface Props {
   show: boolean | undefined;
   closeColorPicker: () => void;
-};
+}
 
-const ColorPicker = (props: IProps) => {
+const ColorPicker = (props: Props) => {
   const ThemeButtons = () => (
-    <Fragment>{themes.map((hue, idx) => (
-      <div
-        key={idx}
-        className={styles.themeBtnWrapper}
-      >
-        <button
-          onClick={() => changeTheme(hue)}
-          style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }}
-          className={styles.themeBtn}
-        >
-        </button>
-      </div>
-    ))}
+    <Fragment>
+      {themes.map((hue, idx) => (
+        <div key={idx} className={styles.themeBtnWrapper}>
+          <button
+            onClick={() => changeTheme(hue)}
+            style={{ backgroundColor: `hsl(${hue}, 50%, 30%)` }}
+            className={styles.themeBtn}
+          ></button>
+        </div>
+      ))}
     </Fragment>
   );
 
@@ -55,6 +52,7 @@ const ColorPicker = (props: IProps) => {
   );
 };
 
-export default memo(ColorPicker, (prevProps, nextProps) =>
-  prevProps.show === nextProps.show
+export default memo(
+  ColorPicker,
+  (prevProps, nextProps) => prevProps.show === nextProps.show
 );
