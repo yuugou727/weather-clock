@@ -228,7 +228,7 @@ const HourlyWeather = (props: Props) => {
             yMax: coldTemp,
             yMin:
               Math.ceil(minFeltTemp) < coldTemp
-                ? floorToEven(Math.ceil(minFeltTemp))
+                ? floorToEven(Math.floor(minFeltTemp))
                 : coldTemp,
             backgroundColor: 'hsla(205, 70%, 60%, 0.25)',
             borderWidth: 0,

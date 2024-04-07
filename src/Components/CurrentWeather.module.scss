@@ -1,16 +1,24 @@
-
 .weatherInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: 3vmin;
+
   .weatherIcon {
     background-color: rgb(135, 154, 179);
     border-radius: 50%;
     height: 14vh;
+    width: 14vh;
+    &.skeleton {
+      animation: skeleton-loading 1s ease-in-out infinite alternate;
+    }
   }
   .location {
     font-size: smaller;
   }
   .weather {
     font-size: larger;
+    white-space: pre;
   }
 }
 
@@ -19,9 +27,19 @@
   .temp {
     font-size: 12vmin;
     font-weight: lighter;
+    white-space: pre;
   }
   .warningIcon {
     height: 24px;
     vertical-align: middle;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: rgba(135, 154, 179, 0.5);
+  }
+  100% {
+    background-color: rgba(135, 154, 179, 1);
   }
 }

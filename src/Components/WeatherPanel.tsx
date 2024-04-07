@@ -127,7 +127,7 @@ const WeatherPanel = () => {
 
   // check update status every 15 seconds
   useEffect(() => {
-    let intervalId: NodeJS.Timer | undefined;
+    let intervalId: NodeJS.Timeout | undefined;
     const updateStatus = () => {
       const status = formatDistanceStrict(new Date(), fetchTime, {
         locale: zhTW,

@@ -14,17 +14,23 @@ const App = () => {
       <WeatherPanel />
       <footer>
         <p>
-          <span className="version">
-            {/* v{VITE_VAR_VERSION}x */}
-          </span>Ronnie Chang © 2023 (<a
+          <span className="version">v{VITE_VAR_VERSION}</span> Ronnie Chang ©
+          2023 (
+          <a
             href="https://github.com/yuugou727/weather-clock"
             target="_blank"
             rel="noopener noreferrer"
-          >Github</a>). Weather info by <a
+          >
+            Github
+          </a>
+          ). Weather info by{' '}
+          <a
             href="https://openweathermap.org/"
             target="_blank"
             rel="noopener noreferrer"
-          >OpenWeather</a>
+          >
+            OpenWeather
+          </a>
         </p>
       </footer>
       <ToastContainer
@@ -37,6 +43,6 @@ const App = () => {
       />
     </div>
   );
-}
+};
 
 export default App;

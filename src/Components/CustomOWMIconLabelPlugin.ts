@@ -32,27 +32,42 @@ const CustomOWMIconLabelPlugin: any = {
           drawIcon(ctx, x, y, rawData[i].image);
         }
       }
-    })
-    function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+    });
+    function drawCircle(
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number
+    ): void {
       ctx.restore();
       ctx.strokeStyle = circleColor;
       ctx.fillStyle = circleColor;
       ctx.beginPath();
-      ctx.arc(x - xOffset, y - yOffset, (iconSize / 2) + iconPadding, 0, 2 * Math.PI);
+      ctx.arc(
+        x - xOffset,
+        y - yOffset,
+        iconSize / 2 + iconPadding,
+        0,
+        2 * Math.PI
+      );
       ctx.stroke();
       ctx.fill();
     }
-    function drawIcon(ctx: CanvasRenderingContext2D, x: number, y: number, iconImg: HTMLImageElement): void {
+    function drawIcon(
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      iconImg: HTMLImageElement
+    ): void {
       ctx.restore();
       ctx.drawImage(
         iconImg,
-        x - (iconSize / 2) - xOffset,
-        y - (iconSize / 2) - yOffset,
+        x - iconSize / 2 - xOffset,
+        y - iconSize / 2 - yOffset,
         iconSize,
         iconSize
       );
     }
-  }
+  },
 };
 
 export default CustomOWMIconLabelPlugin;

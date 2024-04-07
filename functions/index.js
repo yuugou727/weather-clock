@@ -8,7 +8,6 @@ const origins =
         `https://${PROJECT_ID}.firebaseapp.com`,
       ];
 const cors = require('cors')({ origin: origins });
-const fetch = require('node-fetch');
 const qs = require('qs');
 
 // Open Weather
