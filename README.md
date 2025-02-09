@@ -7,15 +7,15 @@ Demo: https://ronnie-weather-clock.web.app
 打包成PWA，支援 Android Chrome 或 iOS Safari「加到主畫面」選項，方便下載成 App 單獨使用。
 
 # 開發環境
-- [Bun](https://bun.sh) v1.0.18
+- [Bun](https://bun.sh) v1.2.1
 - [Firebase CLI](https://firebase.google.com/docs/cli?hl=zh-tw)
 
 # 架構
 
 前後端分離架構：
 - 前端 PWA 最初使用 [Create React App](https://github.com/facebookincubator/create-react-app)
-建置，後已轉換使用 [Vite](https://vitejs.dev/)、[vitest](https://vitest.dev/) 與 [Vite PWA](https://vite-pwa-org.netlify.app/)。
-- 後端 API 為 Firebase Functions (Node.js)，proxy 第三方服務API
+建置，現已轉換使用 [Vite](https://vitejs.dev/)、[vitest](https://vitest.dev/) 與 [Vite PWA](https://vite-pwa-org.netlify.app/)。
+- 後端 API 為 Firebase Functions 服務 (Node.js v20)，proxy 第三方服務API
 
 ### 平台
 - [Firebase Hosting](https://firebase.google.com/docs/hosting) 託管靜態前端檔案
@@ -35,7 +35,7 @@ Demo: https://ronnie-weather-clock.web.app
 - 於 [Google Cloud 地圖平台](https://console.cloud.google.com/google/maps-apis/credentials)新增專案，並建立一組能呼叫 Geolocation API 的憑證金鑰
 - 註冊 Open Weather Map 免費服務，建立一組 [API key](https://home.openweathermap.org/api_keys)
 
-## 前端本機環境設定
+## 前端本機環境參數設定
 於根目錄新建一個環境變數檔案 `.env.local` ，並寫入 Google Geolocation API 金鑰與 Firebase 專案ID：
 
 ```env .env.local
@@ -45,17 +45,19 @@ PROJECT_ID=Firebase_Project_ID
 
 > Project ID 可在 Firebase web console 查看，也能從本機運行或部署 functions 時的終端機訊息中查找
 
-## Firebase Functions 環境設定
+## Firebase Functions 環境設定 密鑰參數
     
-- 於 functions 資料夾下指令，將 Open Weather Map 的 API Key 設定至環境變數：
+- 於 functions 資料夾下指令，將 Open Weather Map 提供的 API Key 設定為密鑰參數 `OPENWEATHER_KEY`：
     ```sh
-    firebase functions:config:set openweather.key="Weather_API_Key"
+    firebase functions:secrets:set OPENWEATHER_KEY  
     ```
-- 下指令產生`.runtimeconfig.json` 檔案用以本機模擬變數使用：
+    複製 API Key，於提示出現後的 hidden input 行貼上並 enter
+
+    之後可用此指令查詢已輸入的值：
     ```sh
-    firebase functions:config:get > .runtimeconfig.json
+    firebase functions:secrets:access OPENWEATHER_KEY  
     ```
-    > 參考 [Run functions locally](https://firebase.google.com/docs/functions/local-emulator) 與 [為 function 設定環境變數](https://firebase.google.com/docs/functions/config-env)
+> 參考 [Firebase 文件: 設定環境-密鑰參數](https://firebase.google.com/docs/functions/config-env?hl=zh-tw&gen=2nd)
 
 ## 指令
 

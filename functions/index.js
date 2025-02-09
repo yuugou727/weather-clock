@@ -1,4 +1,8 @@
-const functions = require('firebase-functions');
+const { setGlobalOptions } = require('firebase-functions/v2');
+const { onRequest } = require('firebase-functions/v2/https');
+const { defineSecret } = require('firebase-functions/params');
+const { debug, warn, error } = require('firebase-functions/logger');
+
 const PROJECT_ID = process.env.GCLOUD_PROJECT;
 const origins =
   process.env.NODE_ENV !== 'production'
@@ -11,54 +15,63 @@ const cors = require('cors')({ origin: origins });
 const qs = require('qs');
 
 // Open Weather
-const weatherAPI = 'https://api.openweathermap.org/data/2.5/onecall';
+const weatherAPI = 'https://api.openweathermap.org/data/3.0/onecall';
 const reverseGeocodingAPI = 'http://api.openweathermap.org/geo/1.0/reverse';
-const OwmKey = functions.config().openweather.key;
+const OwmKey = defineSecret('OPENWEATHER_KEY');
 
-exports.weather = functions.region('asia-east1').https.onRequest((req, res) => {
-  cors(req, res, () => {
-    if (req.method === 'GET') {
-      const { lat, lng } = req.query;
-      const queryString = qs.stringify({
-        lat: lat,
-        lon: lng,
-        appid: OwmKey,
-        exclude: 'minutely,daily,alerts',
-        units: 'metric',
-        lang: 'zh_tw',
-      });
-      fetch(weatherAPI + '?' + queryString)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(response.statusText);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          functions.logger.debug('[weather] API success');
-          res.status(200).send(data);
-        })
-        .catch((err) => {
-          functions.logger.error('[weather]', err);
-          res.status(500).send({ message: err.message });
-        });
-    } else {
-      functions.logger.warn('[weather] invalid req:', req);
-      return res.sendStatus(500);
-    }
-  });
+setGlobalOptions({
+  cpu: 'gcf_gen1', // 1st gen default fractional CPU
+  region: 'asia-east1', // locate all functions closest to users
 });
 
-exports.reverseGeocoding = functions
-  .region('asia-east1')
-  .https.onRequest((req, res) => {
+exports.weather = onRequest(
+  { secrets: [OwmKey], maxInstances: 2 },
+  (req, res) => {
     cors(req, res, () => {
       if (req.method === 'GET') {
         const { lat, lng } = req.query;
         const queryString = qs.stringify({
           lat: lat,
           lon: lng,
-          appid: OwmKey,
+          appid: OwmKey.value(),
+          exclude: 'minutely,daily,alerts',
+          units: 'metric',
+          lang: 'zh_tw',
+        });
+        fetch(weatherAPI + '?' + queryString)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            debug('[weather] API success');
+            res.status(200).send(data);
+          })
+          .catch((err) => {
+            error('[weather]', {err}, );
+            debug('[weather] key', OwmKey.value())
+            res.status(500).send({ message: err.message });
+          });
+      } else {
+        warn('[weather] invalid req:', req);
+        return res.sendStatus(500);
+      }
+    });
+  }
+);
+
+exports.reverseGeocoding = onRequest(
+  { secrets: [OwmKey], maxInstances: 2 },
+  (req, res) => {
+    cors(req, res, () => {
+      if (req.method === 'GET') {
+        const { lat, lng } = req.query;
+        const queryString = qs.stringify({
+          lat: lat,
+          lon: lng,
+          appid: OwmKey.value(),
           limit: 1,
         });
         fetch(reverseGeocodingAPI + '?' + queryString)
@@ -69,16 +82,17 @@ exports.reverseGeocoding = functions
             return response.json();
           })
           .then((data) => {
-            functions.logger.debug('[reverseGeocoding] API success');
+            debug('[reverseGeocoding] API success');
             res.status(200).send(data);
           })
           .catch((err) => {
-            functions.logger.error('[reverseGeocoding]', err);
+            error('[reverseGeocoding]', err);
             res.status(500).send({ message: err.message });
           });
       } else {
-        functions.logger.warn('[reverseGeocoding] invalid req:', req);
+        warn('[reverseGeocoding] invalid req:', req);
         return res.sendStatus(500);
       }
     });
-  });
+  }
+);
