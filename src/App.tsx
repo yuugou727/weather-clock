@@ -7,6 +7,7 @@ import Clock from './Components/Clock';
 import WeatherPanel from './Components/WeatherPanel';
 
 const { VITE_VAR_VERSION } = import.meta.env;
+const year = new Date().getFullYear();
 const App = () => {
   return (
     <div className="App">
@@ -15,7 +16,7 @@ const App = () => {
       <footer>
         <p>
           <span className="version">v{VITE_VAR_VERSION}</span> Ronnie Chang ©
-          2023 (
+          {year} (
           <a
             href="https://github.com/yuugou727/weather-clock"
             target="_blank"
