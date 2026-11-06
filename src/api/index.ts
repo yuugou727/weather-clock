@@ -7,8 +7,7 @@ const {
   VITE_VAR_LOCAL_FUNCTIONS,
 } = import.meta.env;
 
-const FUNCTIONS_ROOT = import.meta.env.PROD ?
-  '' : VITE_VAR_LOCAL_FUNCTIONS;
+const FUNCTIONS_ROOT = import.meta.env.PROD ? '' : VITE_VAR_LOCAL_FUNCTIONS;
 
 export const geolocationAPI = async (): Promise<Location> => {
   const api = VITE_VAR_GEOLOCATION_API;
@@ -17,7 +16,7 @@ export const geolocationAPI = async (): Promise<Location> => {
   }
   const res: Response = await fetch(
     api + '?key=' + VITE_VAR_GEOLOCATION_API_KEY,
-    { method: 'POST' }
+    { method: 'POST' },
   );
   if (!res.ok) {
     throw new Error(res.statusText);
@@ -27,20 +26,26 @@ export const geolocationAPI = async (): Promise<Location> => {
     throw new Error(geolocation.error.message);
   }
   const { lat, lng } = geolocation.location;
-  return ({ lat, lng });
+  return { lat, lng };
 };
 
-export const weatherAPI = async (lat: number, lng: number): Promise<WeatherResponse> => {
+export const weatherAPI = async (
+  lat: number,
+  lng: number,
+): Promise<WeatherResponse> => {
   const api = `${FUNCTIONS_ROOT}/weather?lat=${lat}&lng=${lng}`;
-  const weatherResp: Response = await fetch(api)
+  const weatherResp: Response = await fetch(api);
   if (!weatherResp.ok) {
     throw new Error(weatherResp.statusText);
   }
   const weather: Promise<WeatherResponse> = await weatherResp.json();
   return weather;
-}
+};
 
-export const reverseGeocodingAPI = async (lat: number, lng: number): Promise<Geocoding[]> => {
+export const reverseGeocodingAPI = async (
+  lat: number,
+  lng: number,
+): Promise<Geocoding[]> => {
   const api = `${FUNCTIONS_ROOT}/reverseGeocoding?lat=${lat}&lng=${lng}`;
   const geocodingResp: Response = await fetch(api);
   if (!geocodingResp.ok) {
@@ -48,5 +53,4 @@ export const reverseGeocodingAPI = async (lat: number, lng: number): Promise<Geo
   }
   const geocoding: Promise<Geocoding[]> = await geocodingResp.json();
   return geocoding;
-}
-
+};
